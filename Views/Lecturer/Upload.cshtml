@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Upload Documents";
+}
+<div class="container py-4">
+    <h1 class="mb-3">Upload Supporting Documents</h1>
+    <p class="text-muted">Prototype only. File input does not post.</p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Select Claim</label>
+                <select class="form-select">
+                    <option>July 2025 - PROG6212</option>
+                    <option>June 2025 - APDS6112</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Choose File(s)</label>
+                <input type="file" class="form-control" multiple />
+                <div class="form-text">Accepted: PDF, JPG, PNG</div>
+            </div>
+            <button class="btn btn-primary" disabled>Upload</button>
+            <a class="btn btn-outline-secondary ms-2" asp-controller="Lecturer" asp-action="Index">Back</a>
+        </div>
+    </div>
+</div>

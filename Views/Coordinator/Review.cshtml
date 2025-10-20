@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Review Claims";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary fw-bold">📋 Review Submitted Claims</h2>
+
+    <!-- Back Button -->
+    <a asp-controller="Coordinator" asp-action="Index" class="btn btn-outline-secondary mb-3">
+        ⬅ Back
+    </a>
+
+    <div class="card shadow-lg rounded-4">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Lecturer</th>
+                        <th>Month</th>
+                        <th>Total Hours</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td>July 2025</td>
+                        <td>20</td>
+                        <td>R 5,000</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-success me-2">Approve</button>
+                            <button class="btn btn-sm btn-danger">Reject</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

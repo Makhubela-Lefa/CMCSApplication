@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Assign Tasks";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary fw-bold">🗂 Assign Coordinators</h2>
+
+    <!-- Back Button -->
+    <a asp-action="Index" asp-controller="Manager" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+
+    <div class="card shadow-lg rounded-4">
+        <div class="card-body">
+            <form>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Select Lecturer</label>
+                    <select class="form-select">
+                        <option>John Doe</option>
+                        <option>Jane Smith</option>
+                        <option>Michael Brown</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Assign Coordinator</label>
+                    <select class="form-select">
+                        <option>Coordinator A</option>
+                        <option>Coordinator B</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Assign</button>
+            </form>
+        </div>
+    </div>
+</div>

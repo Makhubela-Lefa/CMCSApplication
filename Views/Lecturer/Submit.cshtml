@@ -1,0 +1,49 @@
+﻿@model CMCSApplication.Models.Claim
+
+@{
+    ViewData["Title"] = "Submit Claim";
+}
+
+<div class="container py-4">
+    <h1 class="mb-3">Submit Claim</h1>
+    <p class="text-muted">Fill out the form below to submit your monthly claim.</p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Submit" asp-controller="Lecturer" method="post" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="HourlyRate" class="form-label"></label>
+                        <input asp-for="HourlyRate" class="form-control" placeholder="e.g., 250" />
+                        <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="HoursWorked" class="form-label"></label>
+                        <input asp-for="HoursWorked" class="form-control" placeholder="e.g., 24" />
+                        <span asp-validation-for="HoursWorked" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="SupportingDocument" class="form-label">Supporting Document (PDF, DOCX, XLSX)</label>
+                        <input type="file" name="file" class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <a class="btn btn-outline-secondary" asp-controller="Lecturer" asp-action="Index">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

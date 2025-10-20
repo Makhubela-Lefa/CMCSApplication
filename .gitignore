@@ -1,0 +1,12 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+bin/
+obj/
+
+# ASP.NET Core
+appsettings*.json
+wwwroot/lib/
