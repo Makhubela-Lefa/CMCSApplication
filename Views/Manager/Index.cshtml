@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Manager Dashboard";
+}
+<div class="container py-4">
+    <h1 class="mb-3">Academic Manager Dashboard</h1>
+    <p class="text-muted">Prototype UI — no functionality yet.</p>
+
+    <!-- Home button -->
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill shadow-sm mb-4">
+        🏠 Home
+    </a>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Approve Claims</h5>
+                    <p class="card-text">Final approval of claims verified by coordinators.</p>
+                    <a class="btn btn-primary mt-auto" asp-controller="Manager" asp-action="Approval">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Reports</h5>
+                    <p class="card-text">Generate and review financial claim reports.</p>
+                    <a class="btn btn-outline-primary mt-auto" asp-controller="Manager" asp-action="Reports">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Assign Modules</h5>
+                    <p class="card-text">Allocate teaching modules to lecturers.</p>
+                    <a class="btn btn-outline-primary mt-auto" asp-controller="Manager" asp-action="Assign">Open</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <h5 class="mb-3">Recent Claims (Sample)</h5>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Ref #</th>
+                    <th>Lecturer</th>
+                    <th>Module</th>
+                    <th>Month</th>
+                    <th>Coordinator Status</th>
+                    <th>Manager Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CLM-1023</td>
+                    <td>T. Dlamini</td>
+                    <td>PROG6212</td>
+                    <td>July 2025</td>
+                    <td><span class="badge bg-success">Verified</span></td>
+                    <td><span class="badge bg-warning text-dark">Pending Approval</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+﻿:root {
+    --primary-color: #013328;
+    --secondary-color: #CC8B65;
+    --accent-color: #E3DCD2; /* cream */
+    --dark-color: #100C0D;
+}
+
+/* Page Background */
+body {
+    background-color: var(--accent-color); /* cream background */
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--primary-color) !important;
+}
+
+    .navbar .nav-link,
+    .navbar .navbar-brand {
+        color: var(--accent-color) !important;
+    }
+
+        .navbar .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+
+/* Cards */
+.card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    background-color: #ffffff; /* white cards so they pop on cream bg */
+    border-radius: 12px;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--dark-color);
+    color: var(--accent-color);
+    padding: 1rem 0;
+}
+
+.hero-banner {
+    background: linear-gradient(rgba(1, 51, 40, 0.7), rgba(1, 51, 40, 0.7)), url('your-image.jpg') center no-repeat; /* image + green overlay */
+    background-size: cover; /* makes sure the image fills the section */
+    color: white;
+}
+

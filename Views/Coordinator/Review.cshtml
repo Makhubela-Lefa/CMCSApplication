@@ -1,0 +1,86 @@
+﻿@model CMCSApplication.Models.Claim
+
+@{
+    ViewData["Title"] = "Review Claim";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary fw-bold">📋 Review Claim Details</h2>
+
+    <!-- Back Button -->
+    <a asp-controller="Coordinator" asp-action="VerifyQueue" class="btn btn-outline-secondary mb-3">
+        ⬅ Back to Verify Queue
+    </a>
+
+    <div class="card shadow-lg rounded-4">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <tbody>
+                    <tr>
+                        <th>Lecturer Name</th>
+                        <td>@Model.LecturerName</td>
+                    </tr>
+                    <tr>
+                        <th>Department</th>
+                        <td>@Model.Department</td>
+                    </tr>
+                    <tr>
+                        <th>Month</th>
+                        <td>@Model.Month</td>
+                    </tr>
+                    <tr>
+                        <th>Total Hours</th>
+                        <td>@Model.HoursWorked</td>
+                    </tr>
+                    <tr>
+                        <th>Hourly Rate</th>
+                        <td>R @Model.HourlyRate.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <th>Total Amount</th>
+                        <td class="fw-bold text-success">R @Model.TotalAmount.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            <span class="badge bg-warning text-dark">@Model.Status</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Submitted On</th>
+                        <td>@Model.DateSubmitted.ToString("dd-MMM-yyyy HH:mm")</td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty(Model.SupportingDocument))
+                    {
+                        <tr>
+                            <th>Supporting Document</th>
+                            <td>
+                                <a href="~/uploads/@Model.SupportingDocument" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    📎 View File (@Model.OriginalFileName)
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="mt-4 text-center">
+                <form asp-action="Approve" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success btn-lg me-2">
+                        ✅ Approve
+                    </button>
+                </form>
+
+                <form asp-action="Reject" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to reject this claim?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        ❌ Reject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

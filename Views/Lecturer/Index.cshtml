@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Lecturer Dashboard";
+}
+<div class="container py-4">
+    <h1 class="mb-3">Lecturer Dashboard</h1>
+    <p class="text-muted">Prototype UI — no functionality yet.</p>
+
+    <!-- Home button -->
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill shadow-sm">
+        🏠 Home
+    </a>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Submit Claim</h5>
+                    <p class="card-text">Start a new monthly claim.</p>
+                    <a class="btn btn-primary mt-auto" asp-controller="Lecturer" asp-action="Submit">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Upload Documents</h5>
+                    <p class="card-text">Attach supporting files for your claim.</p>
+                    <a class="btn btn-outline-primary mt-auto" asp-controller="Lecturer" asp-action="Upload">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">My Claims</h5>
+                    <p class="card-text">View previously submitted claims and statuses.</p>
+                    <a class="btn btn-outline-primary mt-auto" asp-controller="Lecturer" asp-action="MyClaims">Open</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <h5 class="mb-3">Recent Claims (Sample)</h5>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Module</th>
+                    <th>Hours</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>July 2025</td>
+                    <td>PROG6212</td>
+                    <td>24</td>
+                    <td>R 6,000</td>
+                    <td><span class="badge bg-secondary">Draft</span></td>
+                </tr>
+                <tr>
+                    <td>June 2025</td>
+                    <td>APDS6112</td>
+                    <td>18</td>
+                    <td>R 4,500</td>
+                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                </tr>
+                <tr>
+                    <td>May 2025</td>
+                    <td>WEDE6020</td>
+                    <td>16</td>
+                    <td>R 4,000</td>
+                    <td><span class="badge bg-success">Approved</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

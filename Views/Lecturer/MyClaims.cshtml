@@ -1,0 +1,78 @@
+﻿@model IEnumerable<CMCSApplication.Models.Claim>
+
+@{
+    ViewData["Title"] = "My Claims";
+}
+
+<div class="container py-4">
+    <h1 class="mb-3">My Claims</h1>
+    <p class="text-muted">Below are your submitted claims.</p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Ref #</th>
+                    <th>Date Submitted</th>
+                    <th>Hours</th>
+                    <th>Hourly Rate</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Document</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    int refNum = 1000;
+                    foreach (var claim in Model)
+                    {
+                        <tr>
+                            <td>CLM-@refNum</td>
+                            <td>@claim.DateSubmitted.ToString("MMMM yyyy")</td>
+                            <td>@claim.HoursWorked</td>
+                            <td>R @claim.HourlyRate</td>
+                            <td>R @claim.TotalAmount</td>
+                            <td>
+                                @if (claim.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">Approved</span>
+                                }
+                                else if (claim.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">Rejected</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@claim.Status</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(claim.SupportingDocument))
+                                {
+                                    <a href="~/uploads/@claim.SupportingDocument" target="_blank">View</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No file</span>
+                                }
+                            </td>
+                        </tr>
+                        refNum++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">No claims found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

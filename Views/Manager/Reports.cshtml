@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary fw-bold">📊 Monthly Claim Reports</h2>
+
+    <!-- Back Button -->
+    <a asp-action="Index" asp-controller="Manager" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Summary Report</h5>
+                    <p>Total Claims: <span class="fw-semibold text-success">45</span></p>
+                    <p>Total Payout: <span class="fw-semibold text-success">R 120,000</span></p>
+                    <button class="btn btn-outline-primary btn-sm">Download PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Department Breakdown</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between">
+                            Computer Science <span class="fw-bold">R 50,000</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            Engineering <span class="fw-bold">R 40,000</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            Business <span class="fw-bold">R 30,000</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
