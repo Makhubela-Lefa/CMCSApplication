@@ -79,13 +79,19 @@ namespace CMCSApplication.Controllers
 
 
         // Optional: Detailed Review View for Individual Claim
+        // Review a specific claim in detail
         public IActionResult Review(int id)
         {
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+
             if (claim == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "Claim not found.";
+                return RedirectToAction(nameof(VerifyQueue));
+            }
 
             return View(claim);
         }
+
     }
 }

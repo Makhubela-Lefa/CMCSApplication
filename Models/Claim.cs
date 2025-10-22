@@ -24,6 +24,8 @@ namespace CMCSApplication.Models
         public decimal HourlyRate { get; set; }
         public DateTime? DateVerified { get; set; }
 
+        public DateTime? DateApproved { get; set; }
+
 
         // Add this property for your view
         public decimal TotalAmount

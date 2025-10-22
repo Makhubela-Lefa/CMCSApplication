@@ -12,6 +12,15 @@
         ⬅ Back to Verify Queue
     </a>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
     <div class="card shadow-lg rounded-4">
         <div class="card-body">
             <table class="table table-hover align-middle">
@@ -43,7 +52,12 @@
                     <tr>
                         <th>Status</th>
                         <td>
-                            <span class="badge bg-warning text-dark">@Model.Status</span>
+                            <span class="badge
+                                @(Model.Status == "Approved" ? "bg-success" :
+                                                                    Model.Status == "Rejected" ? "bg-danger" :
+                                                                    "bg-warning text-dark")">
+                                @Model.Status
+                            </span>
                         </td>
                     </tr>
                     <tr>
