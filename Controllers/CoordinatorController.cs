@@ -1,6 +1,7 @@
 ﻿using CMCSApplication.Data;
 using CMCSApplication.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMCSApplication.Controllers
 {
@@ -83,20 +84,15 @@ namespace CMCSApplication.Controllers
 
             return RedirectToAction(nameof(VerifyQueue));
         }
-
-        // Optional: Detailed Review View for Individual Claim
-        // Review a specific claim in detail
-        public IActionResult Review(int id)
+        // View all claims for review (simplified, no filters)
+        public IActionResult ReviewQueue()
         {
-            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            // Get all pending claims
+            var claims = _context.Claims
+                .Where(c => c.Status == "Pending Verification" || c.Status == "Verified by Coordinator" || c.Status == "Rejected by Coordinator")
+                .ToList();
 
-            if (claim == null)
-            {
-                TempData["ErrorMessage"] = "Claim not found.";
-                return RedirectToAction(nameof(VerifyQueue));
-            }
-
-            return View(claim);
+            return View(claims);
         }
 
     }

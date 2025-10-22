@@ -1,17 +1,18 @@
-﻿@model CMCSApplication.Models.Claim
+﻿@model List<CMCSApplication.Models.Claim>
 
 @{
-    ViewData["Title"] = "Review Claim";
+    ViewData["Title"] = "Review Claims Queue";
 }
 
 <div class="container mt-5">
-    <h2 class="mb-4 text-primary fw-bold">📋 Review Claim Details</h2>
+    <h2 class="mb-4 text-primary fw-bold">📋 Review Claims Queue</h2>
 
     <!-- Back Button -->
-    <a asp-controller="Coordinator" asp-action="VerifyQueue" class="btn btn-outline-secondary mb-3">
-        ⬅ Back to Verify Queue
+    <a asp-controller="Coordinator" asp-action="Index" class="btn btn-secondary mb-3">
+        ⬅ Back to Dashboard
     </a>
 
+    <!-- Success & Error Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success">@TempData["SuccessMessage"]</div>
@@ -21,96 +22,89 @@
         <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
     }
 
+    <!-- Claims Table -->
     <div class="card shadow-lg rounded-4">
         <div class="card-body">
-            <table class="table table-hover align-middle">
-                <tbody>
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-primary">
                     <tr>
-                        <th>Lecturer Name</th>
-                        <td>@Model.LecturerName</td>
-                    </tr>
-                    <tr>
+                        <th>Lecturer</th>
                         <th>Department</th>
-                        <td>@Model.Department</td>
-                    </tr>
-                    <tr>
                         <th>Month</th>
-                        <td>@Model.Month</td>
-                    </tr>
-                    <tr>
                         <th>Total Hours</th>
-                        <td>@Model.HoursWorked</td>
-                    </tr>
-                    <tr>
-                        <th>Hourly Rate</th>
-                        <td>R @Model.HourlyRate.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <th>Total Amount</th>
-                        <td class="fw-bold text-success">R @Model.TotalAmount.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <th>Status</th>
-                        <td>
-                            @* Status Badges matching VerifyQueue *@
-                            @if (Model.Status == "Pending Verification")
-                            {
-                                <span class="badge bg-warning text-dark">Pending Verification</span>
-                            }
-                            else if (Model.Status == "Verified")
-                            {
-                                <span class="badge bg-success">Verified</span>
-                            }
-                            else if (Model.Status == "Rejected by Coordinator")
-                            {
-                                <span class="badge bg-danger">Rejected by Coordinator</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">@Model.Status</span>
-                            }
-                        </td>
-                    </tr>
-                    <tr>
                         <th>Submitted On</th>
-                        <td>@Model.DateSubmitted.ToString("dd-MMM-yyyy HH:mm")</td>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Actions</th>
                     </tr>
-                    @if (!string.IsNullOrEmpty(Model.SupportingDocument))
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td>@claim.LecturerName</td>
+                                <td>@claim.Department</td>
+                                <td>@claim.Month</td>
+                                <td>@claim.HoursWorked</td>
+                                <td>@claim.DateSubmitted.ToString("dd-MMM-yyyy")</td>
+                                <td class="text-center">
+                                    @if (claim.Status == "Pending Verification")
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending Verification</span>
+                                    }
+                                    else if (claim.Status == "Verified by Coordinator")
+                                    {
+                                        <span class="badge bg-success">Verified</span>
+                                    }
+                                    else if (claim.Status == "Rejected by Coordinator")
+                                    {
+                                        <span class="badge bg-danger">Rejected</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@claim.Status</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <!-- Approve -->
+                                    <form asp-action="Approve" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@claim.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success me-1"
+                                                @(claim.Status.Contains("Verified") ? "disabled" : "")>
+                                            ✅ Approve
+                                        </button>
+                                    </form>
+
+                                    <!-- Reject -->
+                                    <form asp-action="Reject" method="post" class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to reject this claim?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@claim.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                @(claim.Status.Contains("Rejected") ? "disabled" : "")>
+                                            ❌ Reject
+                                        </button>
+                                    </form>
+
+                                    <!-- Review -->
+                                    <a asp-action="Review" asp-route-id="@claim.Id"
+                                       class="btn btn-sm btn-outline-primary ms-1">
+                                        👁 Review
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <th>Supporting Document</th>
-                            <td>
-                                <a href="~/uploads/@Model.SupportingDocument" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    📎 View File (@Model.OriginalFileName)
-                                </a>
-                            </td>
+                            <td colspan="7" class="text-center text-muted py-3">No claims found.</td>
                         </tr>
                     }
                 </tbody>
             </table>
-
-            <div class="mt-4 text-center">
-                <!-- Approve Button -->
-                <form asp-action="Approve" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-success btn-lg me-2"
-                            @(Model.Status.Contains("Approved") ? "disabled" : "")>
-                        ✅ Approve
-                    </button>
-                </form>
-
-                <!-- Reject Button -->
-                <form asp-action="Reject" method="post" class="d-inline"
-                      onsubmit="return confirm('Are you sure you want to reject this claim?');">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-danger btn-lg"
-                            @(Model.Status.Contains("Rejected") ? "disabled" : "")>
-                        ❌ Reject
-                    </button>
-                </form>
-            </div>
         </div>
     </div>
 </div>

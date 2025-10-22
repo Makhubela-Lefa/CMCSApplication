@@ -99,6 +99,25 @@ namespace CMCSApplication.Controllers
         // Reports page
         public IActionResult Reports()
         {
+            // Get all claims
+            var claims = _context.Claims.ToList();
+
+            // Total claims
+            ViewBag.TotalClaims = claims.Count;
+
+            // Total payout (sum of all TotalAmount)
+            ViewBag.TotalPayout = claims.Sum(c => c.TotalAmount);
+
+            // Department breakdown
+            ViewBag.DepartmentTotals = claims
+                .GroupBy(c => c.Department)
+                .Select(g => new
+                {
+                    Department = g.Key,
+                    TotalAmount = g.Sum(c => c.TotalAmount)
+                })
+                .ToList();
+
             return View();
         }
 

@@ -10,33 +10,31 @@
         ⬅ Back
     </a>
 
-    <!-- 🔹 Placeholder for future dynamic data -->
     <div class="row g-4">
+        <!-- Summary Report Card -->
         <div class="col-md-6">
             <div class="card shadow-lg rounded-4 border-0">
                 <div class="card-body">
                     <h5 class="card-title fw-bold">Summary Report</h5>
-                    <p>Total Claims: <span class="fw-semibold text-success">45</span></p>
-                    <p>Total Payout: <span class="fw-semibold text-success">R 120,000</span></p>
+                    <p>Total Claims: <span class="fw-semibold text-success">@ViewBag.TotalClaims</span></p>
+                    <p>Total Payout: <span class="fw-semibold text-success">R @(ViewBag.TotalPayout.ToString("N2"))</span></p>
                     <button class="btn btn-outline-primary btn-sm">Download PDF</button>
                 </div>
             </div>
         </div>
 
+        <!-- Department Breakdown Card -->
         <div class="col-md-6">
             <div class="card shadow-lg rounded-4 border-0">
                 <div class="card-body">
                     <h5 class="card-title fw-bold">Department Breakdown</h5>
                     <ul class="list-group">
-                        <li class="list-group-item d-flex justify-content-between">
-                            Computer Science <span class="fw-bold">R 50,000</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            Engineering <span class="fw-bold">R 40,000</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            Business <span class="fw-bold">R 30,000</span>
-                        </li>
+                        @foreach (var dept in ViewBag.DepartmentTotals)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                @dept.Department <span class="fw-bold">R @(dept.TotalAmount.ToString("N2"))</span>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
