@@ -44,7 +44,7 @@ namespace CMCSApplication.Controllers
             return View();
         }
 
-        // POST: Lecturer/Submit
+        // POST: Lecturer/Submit 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Submit(Claim claim)
@@ -96,6 +96,24 @@ namespace CMCSApplication.Controllers
                     claim.OriginalFileName = claim.UploadFile.FileName;
                     claim.SupportingDocument = $"/uploads/{uniqueFileName}";
                 }
+
+                // --- NEW: Link claim to Lecturer ---
+                var existingLecturer = _context.Lecturers
+                    .FirstOrDefault(l => l.Name == claim.LecturerName);
+
+                if (existingLecturer == null)
+                {
+                    existingLecturer = new Lecturer
+                    {
+                        Name = claim.LecturerName,
+                        Department = claim.Department
+                    };
+
+                    _context.Lecturers.Add(existingLecturer);
+                    _context.SaveChanges();
+                }
+
+                claim.LecturerId = existingLecturer.Id; // establish link
 
                 // --- Claim Metadata ---
                 claim.Status = "Pending Verification";

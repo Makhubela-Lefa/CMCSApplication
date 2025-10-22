@@ -13,6 +13,11 @@ namespace CMCSApplication.Models
         [Required(ErrorMessage = "Lecturer name is required")]
         public string LecturerName { get; set; } = string.Empty;
 
+        [ForeignKey("Lecturer")]
+        public int? LecturerId { get; set; }
+        public Lecturer? Lecturer { get; set; }
+
+
         [Required(ErrorMessage = "Department is required")]
         public string Department { get; set; } = string.Empty;
 

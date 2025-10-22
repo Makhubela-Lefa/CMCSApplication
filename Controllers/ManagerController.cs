@@ -32,7 +32,7 @@ namespace CMCSApplication.Controllers
         {
             // Get claims that are either Verified by Coordinator or Pending
             var claimsForManager = _context.Claims
-               .Where(c => c.Status == "Verified")
+               .Where(c => c.Status == "Verified by Coordinator")
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 

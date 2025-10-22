@@ -4,6 +4,7 @@ using CMCSApplication.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMCSApplication.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251022150921_UpdateClaimStatuses")]
+    partial class UpdateClaimStatuses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,9 +56,6 @@ namespace CMCSApplication.Migrations
                     b.Property<int>("HoursWorked")
                         .HasColumnType("int");
 
-                    b.Property<int?>("LecturerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("LecturerName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -86,8 +86,6 @@ namespace CMCSApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LecturerId");
 
                     b.HasIndex("ModuleId");
 
@@ -161,15 +159,9 @@ namespace CMCSApplication.Migrations
 
             modelBuilder.Entity("CMCSApplication.Models.Claim", b =>
                 {
-                    b.HasOne("CMCSApplication.Models.Lecturer", "Lecturer")
-                        .WithMany()
-                        .HasForeignKey("LecturerId");
-
                     b.HasOne("CMCSApplication.Models.Module", "Module")
                         .WithMany()
                         .HasForeignKey("ModuleId");
-
-                    b.Navigation("Lecturer");
 
                     b.Navigation("Module");
                 });

@@ -18,6 +18,8 @@
             <thead class="table-light">
                 <tr>
                     <th>Ref #</th>
+                    <th>Lecturer</th>
+                    <th>Department</th>
                     <th>Date Submitted</th>
                     <th>Hours</th>
                     <th>Hourly Rate</th>
@@ -34,6 +36,8 @@
                     {
                         <tr>
                             <td>CLM-@refNum</td>
+                            <td>@claim.LecturerName</td>
+                            <td>@claim.Department</td>
                             <td>@claim.DateSubmitted.ToString("MMMM yyyy")</td>
                             <td>@claim.HoursWorked</td>
                             <td>R @claim.HourlyRate</td>
@@ -69,7 +73,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-3">No claims found.</td>
+                        <td colspan="9" class="text-center text-muted py-3">No claims found.</td>
                     </tr>
                 }
             </tbody>
