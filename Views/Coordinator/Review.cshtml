@@ -52,12 +52,23 @@
                     <tr>
                         <th>Status</th>
                         <td>
-                            <span class="badge
-                                @(Model.Status == "Approved" ? "bg-success" :
-                                                                    Model.Status == "Rejected" ? "bg-danger" :
-                                                                    "bg-warning text-dark")">
-                                @Model.Status
-                            </span>
+                            @* Status Badges matching VerifyQueue *@
+                            @if (Model.Status == "Pending Verification")
+                            {
+                                <span class="badge bg-warning text-dark">Pending Verification</span>
+                            }
+                            else if (Model.Status == "Verified")
+                            {
+                                <span class="badge bg-success">Verified</span>
+                            }
+                            else if (Model.Status == "Rejected by Coordinator")
+                            {
+                                <span class="badge bg-danger">Rejected by Coordinator</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
                         </td>
                     </tr>
                     <tr>
@@ -79,18 +90,23 @@
             </table>
 
             <div class="mt-4 text-center">
+                <!-- Approve Button -->
                 <form asp-action="Approve" method="post" class="d-inline">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-success btn-lg me-2">
+                    <button type="submit" class="btn btn-success btn-lg me-2"
+                            @(Model.Status.Contains("Approved") ? "disabled" : "")>
                         ✅ Approve
                     </button>
                 </form>
 
-                <form asp-action="Reject" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to reject this claim?');">
+                <!-- Reject Button -->
+                <form asp-action="Reject" method="post" class="d-inline"
+                      onsubmit="return confirm('Are you sure you want to reject this claim?');">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-danger btn-lg">
+                    <button type="submit" class="btn btn-danger btn-lg"
+                            @(Model.Status.Contains("Rejected") ? "disabled" : "")>
                         ❌ Reject
                     </button>
                 </form>

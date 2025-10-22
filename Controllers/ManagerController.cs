@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
 using CMCSApplication.Data;
 using CMCSApplication.Models;
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMCSApplication.Controllers
 {
@@ -17,18 +18,25 @@ namespace CMCSApplication.Controllers
         // Dashboard
         public IActionResult Index()
         {
+            // Get the 5 most recent claims for display
+            ViewBag.RecentClaims = _context.Claims
+                .Include(c => c.Module)
+                .OrderByDescending(c => c.DateSubmitted)
+                .Take(5)
+                .ToList();
+
             return View();
         }
 
-        // List of verified claims ready for manager approval
         public IActionResult Approval()
         {
-            var verifiedClaims = _context.Claims
-                .Where(c => c.Status == "Verified")
-                .OrderByDescending(c => c.DateVerified)
+            // Get claims that are either Verified by Coordinator or Pending
+            var claimsForManager = _context.Claims
+                .Where(c => c.Status == "Verified" || c.Status.Contains("Pending"))
+                .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
-            return View(verifiedClaims);
+            return View(claimsForManager);
         }
 
         // Review a single verified claim
@@ -86,16 +94,92 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Approval");
         }
 
-        // Reports page (you already have)
+        // Reports page
         public IActionResult Reports()
         {
             return View();
         }
 
-        // Assign coordinators page (you already have)
-        public IActionResult Assign()
+        // GET: Assign Modules
+        public IActionResult AssignModules()
         {
+            ViewBag.Lecturers = _context.Lecturers.ToList();
+            ViewBag.Modules = _context.Modules.ToList();
+            ViewBag.Assignments = _context.ModuleAssignments
+                                          .Include(ma => ma.Lecturer)
+                                          .Include(ma => ma.Module)
+                                          .ToList();
             return View();
         }
+
+        // POST: Assign Module
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AssignModule(int lecturerId, int moduleId)
+        {
+            if (!_context.ModuleAssignments.Any(ma => ma.LecturerId == lecturerId && ma.ModuleId == moduleId))
+            {
+                var assignment = new ModuleAssignment
+                {
+                    LecturerId = lecturerId,
+                    ModuleId = moduleId
+                };
+                _context.ModuleAssignments.Add(assignment);
+                _context.SaveChanges();
+                TempData["Success"] = "Module assigned successfully!";
+            }
+            else
+            {
+                TempData["Error"] = "This module is already assigned to the lecturer.";
+            }
+            return RedirectToAction("AssignModules");
+        }
+
+        // POST: Add Module Inline (from modal)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddModuleInline(string moduleName)
+        {
+            if (!string.IsNullOrWhiteSpace(moduleName))
+            {
+                if (!_context.Modules.Any(m => m.Name == moduleName))
+                {
+                    var module = new Module { Name = moduleName };
+                    _context.Modules.Add(module);
+                    _context.SaveChanges();
+                    TempData["Success"] = "Module added successfully!";
+                }
+                else
+                {
+                    TempData["Error"] = "This module already exists.";
+                }
+            }
+            else
+            {
+                TempData["Error"] = "Module name cannot be empty.";
+            }
+
+            return RedirectToAction("AssignModules");
+        }
+
+        // POST: Delete Assignment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteAssignment(int id)
+        {
+            var assignment = _context.ModuleAssignments.FirstOrDefault(ma => ma.Id == id);
+            if (assignment != null)
+            {
+                _context.ModuleAssignments.Remove(assignment);
+                _context.SaveChanges();
+                TempData["Success"] = "Assignment deleted successfully!";
+            }
+            else
+            {
+                TempData["Error"] = "Assignment not found.";
+            }
+            return RedirectToAction("AssignModules");
+        }
+
     }
 }

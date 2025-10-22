@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Assign Modules";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary fw-bold">🗂 Assign Modules</h2>
+
+    <!-- Back Button -->
+    <a asp-action="Index" asp-controller="Manager" class="btn btn-secondary mb-3">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Assign Module Form -->
+    <form asp-action="AssignModule" method="post" class="mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label>Lecturer</label>
+                <select class="form-select" name="lecturerId" required>
+                    <option value="">-- Select Lecturer --</option>
+                    @foreach (var lecturer in ViewBag.Lecturers)
+                    {
+                        <option value="@lecturer.Id">@lecturer.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label>Module</label>
+                <div class="input-group">
+                    <select class="form-select" name="moduleId" required>
+                        <option value="">-- Select Module --</option>
+                        @foreach (var module in ViewBag.Modules)
+                        {
+                            <option value="@module.Id">@module.Name</option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModuleModal">
+                        Add New
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Assign</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Add Module Modal -->
+    <div class="modal fade" id="addModuleModal" tabindex="-1" aria-labelledby="addModuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="AddModuleInline" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addModuleModalLabel">Add New Module</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Module Name</label>
+                        <input type="text" name="moduleName" class="form-control" required />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add Module</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Assignments Table -->
+    <h4>Current Assignments</h4>
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Lecturer</th>
+                <th>Module</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var assignment in ViewBag.Assignments)
+            {
+                <tr>
+                    <td>@assignment.Lecturer?.Name</td>
+                    <td>@assignment.Module?.Name</td>
+                    <td>
+                        <form asp-action="DeleteAssignment" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@assignment.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,12 +1,15 @@
-﻿@{
+﻿@model IEnumerable<CMCSApplication.Models.Claim>
+
+@{
     ViewData["Title"] = "Lecturer Dashboard";
 }
+
 <div class="container py-4">
     <h1 class="mb-3">Lecturer Dashboard</h1>
-    <p class="text-muted">Prototype UI — no functionality yet.</p>
+    <p class="text-muted">Welcome to your dashboard. Use the options below to manage your claims.</p>
 
     <!-- Home button -->
-    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill shadow-sm">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill shadow-sm mb-4">
         🏠 Home
     </a>
 
@@ -20,6 +23,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body d-flex flex-column">
@@ -29,6 +33,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body d-flex flex-column">
@@ -42,41 +47,53 @@
 
     <hr class="my-4" />
 
-    <h5 class="mb-3">Recent Claims (Sample)</h5>
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Month</th>
-                    <th>Module</th>
-                    <th>Hours</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>July 2025</td>
-                    <td>PROG6212</td>
-                    <td>24</td>
-                    <td>R 6,000</td>
-                    <td><span class="badge bg-secondary">Draft</span></td>
-                </tr>
-                <tr>
-                    <td>June 2025</td>
-                    <td>APDS6112</td>
-                    <td>18</td>
-                    <td>R 4,500</td>
-                    <td><span class="badge bg-warning text-dark">Pending</span></td>
-                </tr>
-                <tr>
-                    <td>May 2025</td>
-                    <td>WEDE6020</td>
-                    <td>16</td>
-                    <td>R 4,000</td>
-                    <td><span class="badge bg-success">Approved</span></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <h5 class="mb-3">Recent Claims</h5>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Month</th>
+                        <th>Hours</th>
+                        <th>Hourly Rate</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Date Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.OrderByDescending(c => c.DateSubmitted).Take(5))
+                    {
+                        <tr>
+                            <td>@claim.Month</td>
+                            <td>@claim.HoursWorked</td>
+                            <td>R @claim.HourlyRate</td>
+                            <td>R @claim.TotalAmount</td>
+                            <td>
+                                @if (claim.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">Approved</span>
+                                }
+                                else if (claim.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">Rejected</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@claim.Status</span>
+                                }
+                            </td>
+                            <td>@claim.DateSubmitted.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No claims submitted yet.</p>
+    }
 </div>

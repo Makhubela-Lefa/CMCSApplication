@@ -32,6 +32,7 @@
                         <th>Month</th>
                         <th>Total Hours</th>
                         <th>Submitted On</th>
+                        <th class="text-center">Status</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -44,6 +45,25 @@
                             <td>@claim.Month</td>
                             <td>@claim.HoursWorked</td>
                             <td>@claim.DateSubmitted.ToString("dd-MMM-yyyy")</td>
+                            <td class="text-center">
+                                @* Status Badges *@
+                                @if (claim.Status == "Pending Verification")
+                                {
+                                    <span class="badge bg-warning text-dark">Pending Verification</span>
+                                }
+                                else if (claim.Status == "Verified")
+                                {
+                                    <span class="badge bg-success">Verified</span>
+                                }
+                                else if (claim.Status == "Rejected by Coordinator")
+                                {
+                                    <span class="badge bg-danger">Rejected by Coordinator</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@claim.Status</span>
+                                }
+                            </td>
                             <td class="text-center">
                                 <!-- Approve Button -->
                                 <form asp-action="Approve" method="post" class="d-inline">
@@ -63,7 +83,7 @@
                                     </button>
                                 </form>
 
-                                <!-- Optional: Review Button -->
+                                <!-- Review Button -->
                                 <a asp-action="Review" asp-route-id="@claim.Id" class="btn btn-sm btn-outline-primary ms-1">
                                     <i class="bi bi-eye"></i> Review
                                 </a>

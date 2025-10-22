@@ -10,5 +10,10 @@ namespace CMCSApplication.Data
         {
         }
         public DbSet<Claim> Claims { get; set; }
+        public DbSet<Module> Modules { get; set; }
+        public DbSet<Lecturer> Lecturers { get; set; }
+
+        public DbSet<ModuleAssignment> ModuleAssignments { get; set; }
+
     }
 }

@@ -29,20 +29,19 @@ namespace CMCSApplication.Controllers
             return View(pendingClaims);
         }
 
-        // Approve a Claim
         [HttpPost]
         public IActionResult Approve(int id)
         {
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
             if (claim != null)
             {
-                claim.Status = "Approved";
-                claim.DateVerified = DateTime.Now; // record the date it was verified
+                claim.Status = "Verified"; // <-- manager sees only Verified claims
+                claim.DateVerified = DateTime.Now;
 
-                _context.Update(claim); // tells EF Core that the entity has changed
-                _context.SaveChanges(); // actually saves it to the database
+                _context.Update(claim);
+                _context.SaveChanges();
 
-                TempData["SuccessMessage"] = "Claim approved successfully!";
+                TempData["SuccessMessage"] = "Claim approved and ready for manager!";
             }
             else
             {
@@ -52,22 +51,19 @@ namespace CMCSApplication.Controllers
             return RedirectToAction(nameof(VerifyQueue));
         }
 
-
-
-        // Reject a Claim
         [HttpPost]
         public IActionResult Reject(int id)
         {
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
             if (claim != null)
             {
-                claim.Status = "Rejected";
-                claim.DateVerified = DateTime.Now; // record rejection date
+                claim.Status = "Rejected by Coordinator"; // optional, you can also just "Rejected"
+                claim.DateVerified = DateTime.Now;
 
                 _context.Update(claim);
                 _context.SaveChanges();
 
-                TempData["ErrorMessage"] = "Claim rejected.";
+                TempData["ErrorMessage"] = "Claim rejected by coordinator.";
             }
             else
             {
@@ -76,7 +72,6 @@ namespace CMCSApplication.Controllers
 
             return RedirectToAction(nameof(VerifyQueue));
         }
-
 
         // Optional: Detailed Review View for Individual Claim
         // Review a specific claim in detail

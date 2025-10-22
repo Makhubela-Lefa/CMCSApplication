@@ -12,7 +12,7 @@
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">No verified claims awaiting approval.</div>
+        <div class="alert alert-info">No claims available for approval.</div>
     }
     else
     {
@@ -37,8 +37,43 @@
                                 <td>@claim.Month</td>
                                 <td>@claim.HoursWorked</td>
                                 <td>R @claim.TotalAmount.ToString("N2")</td>
-                                <td><span class="badge bg-info">@claim.Status</span></td>
+                                <td>
+                                    @if (claim.Status == "Pending Verification")
+                                    {
+                                        <span class="badge bg-secondary">Pending Verification</span>
+                                    }
+                                    else if (claim.Status == "Verified")
+                                    {
+                                        <span class="badge bg-success">Verified</span>
+                                    }
+                                    else if (claim.Status == "Approved by Manager")
+                                    {
+                                        <span class="badge bg-primary">Approved</span>
+                                    }
+                                    else if (claim.Status == "Rejected by Manager")
+                                    {
+                                        <span class="badge bg-danger">Rejected</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">@claim.Status</span>
+                                    }
+                                </td>
                                 <td class="text-center">
+                                    @* Only show Approve/Reject if Verified *@
+                                    @if (claim.Status == "Verified")
+                                    {
+                                        <form asp-action="Approve" method="post" style="display:inline;">
+                                            <input type="hidden" name="id" value="@claim.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                        </form>
+
+                                        <form asp-action="Reject" method="post" style="display:inline;">
+                                            <input type="hidden" name="id" value="@claim.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                        </form>
+                                    }
+                                    @* Optional Review button always visible *@
                                     <a asp-action="Review" asp-route-id="@claim.Id" class="btn btn-sm btn-primary">
                                         Review
                                     </a>

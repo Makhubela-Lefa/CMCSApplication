@@ -1,9 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Manager Dashboard";
 }
+
 <div class="container py-4">
     <h1 class="mb-3">Academic Manager Dashboard</h1>
-    <p class="text-muted">Prototype UI — no functionality yet.</p>
 
     <!-- Home button -->
     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill shadow-sm mb-4">
@@ -34,7 +34,7 @@
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Assign Modules</h5>
                     <p class="card-text">Allocate teaching modules to lecturers.</p>
-                    <a class="btn btn-outline-primary mt-auto" asp-controller="Manager" asp-action="Assign">Open</a>
+                    <a class="btn btn-outline-primary mt-auto" asp-controller="Manager" asp-action="AssignModules">Open</a>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
 
     <hr class="my-4" />
 
-    <h5 class="mb-3">Recent Claims (Sample)</h5>
+    <h5 class="mb-3">Recent Claims</h5>
     <div class="table-responsive">
         <table class="table table-striped align-middle">
             <thead>
@@ -56,14 +56,25 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>CLM-1023</td>
-                    <td>T. Dlamini</td>
-                    <td>PROG6212</td>
-                    <td>July 2025</td>
-                    <td><span class="badge bg-success">Verified</span></td>
-                    <td><span class="badge bg-warning text-dark">Pending Approval</span></td>
-                </tr>
+                @foreach (var claim in ViewBag.RecentClaims)
+                {
+                    <tr>
+                        <td>CLM-@claim.Id</td>
+                        <td>@claim.LecturerName</td>
+                        <td>@claim.Module?.Name ?? "-"</td>
+                        <td>@claim.Month</td>
+                        <td>
+                            <span class="badge @(claim.Status.Contains("Verified") ? "bg-success" : "bg-secondary")">
+                                @(claim.Status.Contains("Verified") ? "Verified" : "Pending")
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge @(claim.Status.Contains("Manager") ? "bg-warning text-dark" : "bg-secondary")">
+                                @(claim.Status.Contains("Manager") ? "Pending Approval" : claim.Status)
+                            </span>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
