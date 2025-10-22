@@ -32,7 +32,7 @@ namespace CMCSApplication.Controllers
         {
             // Get claims that are either Verified by Coordinator or Pending
             var claimsForManager = _context.Claims
-                .Where(c => c.Status == "Verified" || c.Status.Contains("Pending"))
+               .Where(c => c.Status == "Verified")
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
@@ -64,6 +64,7 @@ namespace CMCSApplication.Controllers
             }
 
             claim.Status = "Approved by Manager";
+            claim.ManagerStatus = "Approved";
             claim.DateApproved = DateTime.Now;
 
             _context.Update(claim);
@@ -81,10 +82,11 @@ namespace CMCSApplication.Controllers
             if (claim == null)
             {
                 TempData["Error"] = "Claim not found.";
-                return RedirectToAction("ApprovalQueue");
+                return RedirectToAction("Approval");
             }
 
             claim.Status = "Rejected by Manager";
+            claim.ManagerStatus = "Rejected";
             claim.DateApproved = DateTime.Now;
 
             _context.Update(claim);

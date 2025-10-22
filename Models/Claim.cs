@@ -43,6 +43,13 @@ namespace CMCSApplication.Models
         [Display(Name = "Claim Status")]
         public string Status { get; set; } = "Pending";
 
+        [Display(Name = "Coordinator Status")]
+        public string CoordinatorStatus { get; set; } = "Pending Verification";
+
+        [Display(Name = "Manager Status")]
+        public string ManagerStatus { get; set; } = "Pending Approval";
+
+
         [Display(Name = "Date Submitted")]
         public DateTime DateSubmitted { get; set; } = DateTime.Now;
 

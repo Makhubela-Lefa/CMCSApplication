@@ -10,6 +10,20 @@
         ⬅ Back to Dashboard
     </a>
 
+    <!-- 🔹 TempData alerts (add this section) -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info">@TempData["Info"]</div>
+    }
+    <!-- 🔹 End TempData alerts -->
     @if (!Model.Any())
     {
         <div class="alert alert-info">No claims available for approval.</div>
@@ -60,7 +74,6 @@
                                     }
                                 </td>
                                 <td class="text-center">
-                                    @* Only show Approve/Reject if Verified *@
                                     @if (claim.Status == "Verified")
                                     {
                                         <form asp-action="Approve" method="post" style="display:inline;">
@@ -73,7 +86,6 @@
                                             <button type="submit" class="btn btn-sm btn-danger">Reject</button>
                                         </form>
                                     }
-                                    @* Optional Review button always visible *@
                                     <a asp-action="Review" asp-route-id="@claim.Id" class="btn btn-sm btn-primary">
                                         Review
                                     </a>
@@ -84,5 +96,18 @@
                 </table>
             </div>
         </div>
+        @section Scripts {
+            <script>
+                // Auto-hide TempData alerts after 4 seconds
+                setTimeout(() => {
+                    const alerts = document.querySelectorAll('.alert');
+                    alerts.forEach(a => {
+                        a.style.transition = "opacity 0.5s ease";
+                        a.style.opacity = "0";
+                        setTimeout(() => a.remove(), 500);
+                    });
+                }, 4000);
+            </script>
+        }
     }
 </div>

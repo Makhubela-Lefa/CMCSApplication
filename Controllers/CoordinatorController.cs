@@ -16,8 +16,17 @@ namespace CMCSApplication.Controllers
         // Coordinator Home
         public IActionResult Index()
         {
+            var pendingCount = _context.Claims.Count(c => c.Status == "Pending Verification");
+            var verifiedCount = _context.Claims.Count(c => c.Status == "Verified");
+            var rejectedCount = _context.Claims.Count(c => c.Status == "Rejected by Coordinator");
+
+            ViewBag.PendingCount = pendingCount;
+            ViewBag.VerifiedCount = verifiedCount;
+            ViewBag.RejectedCount = rejectedCount;
+
             return View();
         }
+
 
         // View all Pending Claims for Verification
         public IActionResult VerifyQueue()
@@ -35,7 +44,8 @@ namespace CMCSApplication.Controllers
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
             if (claim != null)
             {
-                claim.Status = "Verified"; // <-- manager sees only Verified claims
+                claim.Status = "Verified by Coordinator";
+                claim.CoordinatorStatus = "Verified";
                 claim.DateVerified = DateTime.Now;
 
                 _context.Update(claim);
@@ -57,7 +67,8 @@ namespace CMCSApplication.Controllers
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
             if (claim != null)
             {
-                claim.Status = "Rejected by Coordinator"; // optional, you can also just "Rejected"
+                claim.Status = "Rejected by Coordinator";
+                claim.CoordinatorStatus = "Rejected";
                 claim.DateVerified = DateTime.Now;
 
                 _context.Update(claim);

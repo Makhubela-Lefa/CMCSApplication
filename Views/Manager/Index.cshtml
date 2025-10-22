@@ -64,15 +64,17 @@
                         <td>@claim.Module?.Name ?? "-"</td>
                         <td>@claim.Month</td>
                         <td>
-                            <span class="badge @(claim.Status.Contains("Verified") ? "bg-success" : "bg-secondary")">
-                                @(claim.Status.Contains("Verified") ? "Verified" : "Pending")
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge @(claim.Status.Contains("Manager") ? "bg-warning text-dark" : "bg-secondary")">
-                                @(claim.Status.Contains("Manager") ? "Pending Approval" : claim.Status)
-                            </span>
-                        </td>
+                            <span class="badge @(claim.CoordinatorStatus == "Verified" ? "bg-success" :
+                                                           claim.CoordinatorStatus == "Rejected" ? "bg-danger" : "bg-secondary")">
+                            @claim.CoordinatorStatus
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge @(claim.ManagerStatus == "Approved" ? "bg-primary" :
+                                                       claim.ManagerStatus == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
+                            @claim.ManagerStatus
+                        </span>
+                    </td>
                     </tr>
                 }
             </tbody>

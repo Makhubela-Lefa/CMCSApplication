@@ -1,49 +1,60 @@
-﻿@using CMCSApplication.Models
-@inject CMCSApplication.Data.ApplicationDbContext _context
-
-@{
+﻿@{
     ViewData["Title"] = "Coordinator Dashboard";
-
-    // Fetch counts for summary badges
-    var pendingCount = _context.Claims.Count(c => c.Status == "Pending Verification");
-    var approvedCount = _context.Claims.Count(c => c.Status == "Approved");
-    var rejectedCount = _context.Claims.Count(c => c.Status == "Rejected");
 }
 
 <div class="container py-4">
-    <h1 class="mb-3">Coordinator Dashboard</h1>
+    <h1 class="mb-3 fw-bold text-primary">Coordinator Dashboard</h1>
 
     <!-- Summary Badges -->
     <div class="mb-4">
-        <span class="badge bg-warning text-dark me-2">⏳ Pending Verification: @pendingCount</span>
-        <span class="badge bg-success me-2">✅ Approved: @approvedCount</span>
-        <span class="badge bg-danger">❌ Rejected: @rejectedCount</span>
+        <span class="badge bg-warning text-dark me-2">
+            ⏳ Pending Verification: @ViewBag.PendingCount
+        </span>
+        <span class="badge bg-success me-2">
+            ✅ Verified: @ViewBag.VerifiedCount
+        </span>
+        <span class="badge bg-danger">
+            ❌ Rejected: @ViewBag.RejectedCount
+        </span>
     </div>
 
     <!-- Home button -->
-    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill shadow-sm mb-4">
+    <a asp-controller="Home" asp-action="Index"
+       class="btn btn-outline-primary rounded-pill shadow-sm mb-4">
         🏠 Home
     </a>
 
     <div class="row g-4">
         <!-- Verify Queue Card -->
         <div class="col-md-6">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100 border-0">
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Verify Queue</h5>
-                    <p class="card-text">View and verify submitted claims.</p>
-                    <a class="btn btn-primary mt-auto" asp-controller="Coordinator" asp-action="VerifyQueue">Open</a>
+                    <h5 class="card-title fw-semibold">Verify Queue</h5>
+                    <p class="card-text text-muted">
+                        View and verify submitted claims waiting for review.
+                    </p>
+                    <a class="btn btn-primary mt-auto"
+                       asp-controller="Coordinator"
+                       asp-action="VerifyQueue">
+                        Open
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Review Claims Card -->
         <div class="col-md-6">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100 border-0">
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Review Claims</h5>
-                    <p class="card-text">Approve or reject claims from lecturers.</p>
-                    <a class="btn btn-outline-primary mt-auto" asp-controller="Coordinator" asp-action="VerifyQueue">Open</a>
+                    <h5 class="card-title fw-semibold">Review Claims</h5>
+                    <p class="card-text text-muted">
+                        Approve or reject claims that lecturers submitted.
+                    </p>
+                    <a class="btn btn-outline-primary mt-auto"
+                       asp-controller="Coordinator"
+                       asp-action="VerifyQueue">
+                        Open
+                    </a>
                 </div>
             </div>
         </div>
