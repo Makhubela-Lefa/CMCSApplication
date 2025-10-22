@@ -53,6 +53,7 @@
                     <th>Month</th>
                     <th>Coordinator Status</th>
                     <th>Manager Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -65,18 +66,26 @@
                         <td>@claim.Month</td>
                         <td>
                             <span class="badge @(claim.CoordinatorStatus == "Verified" ? "bg-success" :
-                                                           claim.CoordinatorStatus == "Rejected" ? "bg-danger" : "bg-secondary")">
+                                                                                     claim.CoordinatorStatus == "Rejected" ? "bg-danger" : "bg-secondary")">
                             @claim.CoordinatorStatus
                         </span>
                     </td>
                     <td>
                         <span class="badge @(claim.ManagerStatus == "Approved" ? "bg-primary" :
-                                                       claim.ManagerStatus == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
+                                                                                 claim.ManagerStatus == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
                             @claim.ManagerStatus
                         </span>
                     </td>
-                    </tr>
-                }
+                    <td>
+                        <form asp-controller="Manager" asp-action="DeleteClaimFromIndex" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@claim.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this claim?');">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                                }
             </tbody>
         </table>
     </div>

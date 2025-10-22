@@ -193,5 +193,24 @@ namespace CMCSApplication.Controllers
 
             return RedirectToAction(nameof(Upload));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteClaim(int id)
+        {
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            if (claim == null)
+            {
+                TempData["Error"] = "Claim not found.";
+                return RedirectToAction("MyClaims");
+            }
+
+            _context.Claims.Remove(claim);
+            _context.SaveChanges();
+            TempData["SuccessMessage"] = "Claim deleted successfully!";
+            return RedirectToAction("MyClaims");
+        }
+
+
     }
 }

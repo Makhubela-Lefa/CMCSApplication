@@ -183,5 +183,92 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("AssignModules");
         }
 
+        // GET: Manager/EditClaim/5
+        public IActionResult EditClaim(int id)
+        {
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            if (claim == null)
+            {
+                TempData["Error"] = "Claim not found.";
+                return RedirectToAction("Approval");
+            }
+
+            ViewBag.Lecturers = _context.Lecturers.ToList();
+            ViewBag.Modules = _context.Modules.ToList();
+
+            return View(claim);
+        }
+
+        // POST: Manager/EditClaim/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditClaim(Claim claim)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Lecturers = _context.Lecturers.ToList();
+                ViewBag.Modules = _context.Modules.ToList();
+                return View(claim);
+            }
+
+            var existingClaim = _context.Claims.FirstOrDefault(c => c.Id == claim.Id);
+            if (existingClaim == null)
+            {
+                TempData["Error"] = "Claim not found.";
+                return RedirectToAction("Approval");
+            }
+
+            // Update fields
+            existingClaim.LecturerId = claim.LecturerId;
+            existingClaim.LecturerName = claim.LecturerName;
+            existingClaim.Department = claim.Department;
+            existingClaim.Month = claim.Month;
+            existingClaim.HoursWorked = claim.HoursWorked;
+            existingClaim.HourlyRate = claim.HourlyRate;
+            existingClaim.Notes = claim.Notes;
+            existingClaim.ModuleId = claim.ModuleId;
+
+            _context.SaveChanges();
+            TempData["Success"] = "Claim updated successfully!";
+            return RedirectToAction("Approval");
+        }
+
+        // POST: Manager/DeleteClaim/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteClaim(int id)
+        {
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            if (claim == null)
+            {
+                TempData["Error"] = "Claim not found.";
+                return RedirectToAction("Approval");
+            }
+
+            _context.Claims.Remove(claim);
+            _context.SaveChanges();
+            TempData["Success"] = "Claim deleted successfully!";
+            return RedirectToAction("Approval");
+        }
+        
+        // POST: Manager/DeleteClaimFromIndex
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteClaimFromIndex(int id)
+        {
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            if (claim == null)
+            {
+                TempData["Error"] = "Claim not found.";
+                return RedirectToAction("Index");
+            }
+
+            _context.Claims.Remove(claim);
+            _context.SaveChanges();
+
+            TempData["Success"] = "Claim deleted successfully!";
+            return RedirectToAction("Index");
+        }
+
     }
 }
