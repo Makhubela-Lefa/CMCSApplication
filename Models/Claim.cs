@@ -25,7 +25,7 @@ namespace CMCSApplication.Models
         public string Month { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Hours worked is required")]
-        [Range(1, 200, ErrorMessage = "Hours must be between 1 and 200")]
+        [Range(1, 180, ErrorMessage = "Hours must be between 1 and 180")]
         public int HoursWorked { get; set; }
 
         [Required(ErrorMessage = "Hourly rate is required")]
@@ -35,6 +35,10 @@ namespace CMCSApplication.Models
 
         [NotMapped] // Not stored directly in DB
         public decimal TotalAmount => HoursWorked * HourlyRate;
+
+        [DataType(DataType.Currency)]
+        public decimal Amount { get; set; }
+
 
         [Display(Name = "Supporting Document Path")]
         public string? SupportingDocument { get; set; }

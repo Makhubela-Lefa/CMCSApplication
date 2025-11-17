@@ -33,7 +33,21 @@ namespace CMCSApplication.Controllers
         // View All Submitted Claims
         public IActionResult MyClaims()
         {
-            var claims = _context.Claims.ToList();
+            var username = HttpContext.Session.GetString("Username");
+            if (username == null)
+                return RedirectToAction("Login", "Account");
+
+            // get lecturer profile
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Username == username);
+            if (lecturer == null)
+                return NotFound("Lecturer profile not found.");
+
+            // only fetch claims that belong to this lecturer
+            var claims = _context.Claims
+                .Where(c => c.LecturerId == lecturer.Id)
+                .OrderByDescending(c => c.DateSubmitted)
+                .ToList();
+
             return View(claims);
         }
 
@@ -41,7 +55,25 @@ namespace CMCSApplication.Controllers
         [HttpGet]
         public IActionResult Submit()
         {
-            return View();
+            // ❗ Lecturer must be logged in
+            var username = HttpContext.Session.GetString("Username");
+            if (username == null)
+                return RedirectToAction("Login", "Account");
+
+            // ❗ Pull lecturer info
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Username == username);
+            if (lecturer == null)
+                return NotFound("Lecturer profile not found.");
+
+            // Prefill model (rate + personal info)
+            var model = new Claim
+            {
+                LecturerId = lecturer.Id,
+                LecturerName = lecturer.Name,
+                HourlyRate = lecturer.HourlyRate
+            };
+
+            return View(model);
         }
 
         // POST: Lecturer/Submit 
@@ -49,87 +81,72 @@ namespace CMCSApplication.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Submit(Claim claim)
         {
-            // --- Debug: log model validation errors ---
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                Console.WriteLine(error.ErrorMessage);
-            }
+            var username = HttpContext.Session.GetString("Username");
+            if (username == null)
+                return RedirectToAction("Login", "Account");
 
-            if (!ModelState.IsValid)
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Username == username);
+            if (lecturer == null)
+                return NotFound("Lecturer profile not found.");
+
+            // Override sensitive fields (cannot come from form)
+            claim.LecturerId = lecturer.Id;
+            claim.LecturerName = lecturer.Name;
+            claim.HourlyRate = lecturer.HourlyRate;
+
+            // Validation: maximum is 180 hours
+            if (claim.HoursWorked > 180)
             {
-                TempData["UploadMessage"] = "Please correct the errors below and try again.";
+                ModelState.AddModelError("HoursWorked", "You cannot claim more than 180 hours in one month.");
                 return View(claim);
             }
 
-            try
+            //Auto-calculation
+            claim.Amount = claim.HoursWorked * claim.HourlyRate;
+
+            //file upload logic
+            if (claim.UploadFile != null && claim.UploadFile.Length > 0)
             {
-                // --- File Upload Handling ---
-                if (claim.UploadFile != null && claim.UploadFile.Length > 0)
+                var allowedExtensions = new[] { ".pdf", ".docx", ".xlsx" };
+                var ext = Path.GetExtension(claim.UploadFile.FileName).ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(ext))
                 {
-                    var allowedExtensions = new[] { ".pdf", ".docx", ".xlsx" };
-                    var ext = Path.GetExtension(claim.UploadFile.FileName).ToLowerInvariant();
-
-                    if (!allowedExtensions.Contains(ext))
-                    {
-                        ModelState.AddModelError("UploadFile", "Invalid file type! Only PDF, DOCX, XLSX are allowed.");
-                        return View(claim);
-                    }
-
-                    if (claim.UploadFile.Length > 5 * 1024 * 1024)
-                    {
-                        ModelState.AddModelError("UploadFile", "File too large! Maximum allowed size is 5 MB.");
-                        return View(claim);
-                    }
-
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                        Directory.CreateDirectory(uploadsFolder);
-
-                    var uniqueFileName = $"{Guid.NewGuid()}{ext}";
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        claim.UploadFile.CopyTo(stream);
-                    }
-
-                    claim.OriginalFileName = claim.UploadFile.FileName;
-                    claim.SupportingDocument = $"/uploads/{uniqueFileName}";
+                    ModelState.AddModelError("UploadFile", "Invalid file type! Only PDF, DOCX, XLSX are allowed.");
+                    return View(claim);
                 }
 
-                // --- NEW: Link claim to Lecturer ---
-                var existingLecturer = _context.Lecturers
-                    .FirstOrDefault(l => l.Name == claim.LecturerName);
-
-                if (existingLecturer == null)
+                if (claim.UploadFile.Length > 5 * 1024 * 1024)
                 {
-                    existingLecturer = new Lecturer
-                    {
-                        Name = claim.LecturerName,
-                        Department = claim.Department
-                    };
-
-                    _context.Lecturers.Add(existingLecturer);
-                    _context.SaveChanges();
+                    ModelState.AddModelError("UploadFile", "File too large! Maximum allowed size is 5 MB.");
+                    return View(claim);
                 }
 
-                claim.LecturerId = existingLecturer.Id; // establish link
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
-                // --- Claim Metadata ---
-                claim.Status = "Pending Verification";
-                claim.DateSubmitted = DateTime.Now;
+                var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                _context.Claims.Add(claim);
-                _context.SaveChanges();
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    claim.UploadFile.CopyTo(stream);
+                }
 
-                TempData["SuccessMessage"] = "✅ Claim submitted successfully!";
-                return RedirectToAction(nameof(MyClaims));
+                claim.OriginalFileName = claim.UploadFile.FileName;
+                claim.SupportingDocument = $"/uploads/{uniqueFileName}";
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"An error occurred while submitting the claim: {ex.Message}");
-                return View(claim);
-            }
+
+            // --- Claim Metadata ---
+            claim.Status = "Pending Verification";
+            claim.DateSubmitted = DateTime.Now;
+
+            _context.Claims.Add(claim);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Claim submitted successfully!";
+            return RedirectToAction(nameof(MyClaims));
         }
 
         // GET: Upload Documents Page

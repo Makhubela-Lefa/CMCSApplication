@@ -11,12 +11,19 @@ namespace CMCSApplication
 
             //  Add DbContext and SQL Server connection (add above services)
             // --- Real SQL Server connection (disabled for testing) ---
-            // builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            //  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+             builder.Services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // --- In-memory database for testing ---
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("TestDatabase"));
+           // builder.Services.AddDbContext<ApplicationDbContext>(options =>
+               // options.UseInMemoryDatabase("TestDatabase"));
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromHours(8);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -35,6 +42,8 @@ namespace CMCSApplication
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseSession();
             app.UseAuthorization();
 
             app.MapStaticAssets();

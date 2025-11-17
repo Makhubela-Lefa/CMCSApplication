@@ -1,0 +1,30 @@
+﻿@model List<CMCSApplication.Models.Lecturer>
+@{
+    ViewData["Title"] = "Lecturer Login";
+}
+<div class="container py-4">
+    <h2>Login as Lecturer (Prototype)</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <form method="post" asp-action="Login">
+        <div class="mb-3">
+            <label class="form-label">Select Lecturer</label>
+            <select name="lecturerId" class="form-select" required>
+                <option value="">-- Select Lecturer --</option>
+                @foreach (var l in Model)
+                {
+                    <option value="@l.Id">@l.Name (@l.Department) — R @l.HourlyRate</option>
+                }
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Login</button>
+    </form>
+</div>
