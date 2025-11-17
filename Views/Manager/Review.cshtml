@@ -49,13 +49,28 @@
                         <th>Total Amount</th>
                         <td class="fw-bold text-success">R @Model.TotalAmount.ToString("N2")</td>
                     </tr>
+
+                    <!-- NEW: Coordinator who verified -->
+                    <tr>
+                        <th>Verified By (Coordinator)</th>
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.CoordinatorId))
+                            {
+                                @Model.CoordinatorId
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not available</span>
+                            }
+                        </td>
+                    </tr>
+
                     <tr>
                         <th>Status</th>
                         <td>
-                            @* Status Badges matching VerifyQueue *@
-                            @if (Model.Status == "Verified")
+                            @if (Model.Status == "Verified by Coordinator")
                             {
-                                <span class="badge bg-success">Verified (Awaiting Approval)</span>
+                                <span class="badge bg-warning text-dark">Verified (Awaiting Manager Approval)</span>
                             }
                             else if (Model.Status == "Approved by Manager")
                             {
@@ -69,13 +84,14 @@
                             {
                                 <span class="badge bg-secondary">@Model.Status</span>
                             }
-
                         </td>
                     </tr>
+
                     <tr>
                         <th>Submitted On</th>
                         <td>@Model.DateSubmitted.ToString("dd-MMM-yyyy HH:mm")</td>
                     </tr>
+
                     @if (!string.IsNullOrEmpty(Model.SupportingDocument))
                     {
                         <tr>

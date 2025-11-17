@@ -33,6 +33,7 @@
                         <th>Month</th>
                         <th>Total Hours</th>
                         <th>Submitted On</th>
+                        <th>Verified By</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Actions</th>
                     </tr>
@@ -48,6 +49,7 @@
                                 <td>@claim.Month</td>
                                 <td>@claim.HoursWorked</td>
                                 <td>@claim.DateSubmitted.ToString("dd-MMM-yyyy")</td>
+                                <td>@claim.CoordinatorId</td>
                                 <td class="text-center">
                                     @if (claim.Status == "Pending Verification")
                                     {

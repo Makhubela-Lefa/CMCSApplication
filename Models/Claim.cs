@@ -59,6 +59,8 @@ namespace CMCSApplication.Models
         [Display(Name = "Manager Status")]
         public string ManagerStatus { get; set; } = "Pending Approval";
 
+        public string? CoordinatorId { get; set; }
+        public string? ManagerId { get; set; }
 
         [Display(Name = "Date Submitted")]
         public DateTime DateSubmitted { get; set; } = DateTime.Now;

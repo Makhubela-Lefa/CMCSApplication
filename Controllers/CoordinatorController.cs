@@ -48,6 +48,8 @@ namespace CMCSApplication.Controllers
                 claim.Status = "Verified by Coordinator";
                 claim.CoordinatorStatus = "Verified";
                 claim.DateVerified = DateTime.Now;
+                claim.CoordinatorId = User.Identity?.Name;
+
 
                 _context.Update(claim);
                 _context.SaveChanges();
@@ -71,6 +73,8 @@ namespace CMCSApplication.Controllers
                 claim.Status = "Rejected by Coordinator";
                 claim.CoordinatorStatus = "Rejected";
                 claim.DateVerified = DateTime.Now;
+                claim.CoordinatorId = User.Identity?.Name;
+
 
                 _context.Update(claim);
                 _context.SaveChanges();
