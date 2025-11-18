@@ -41,6 +41,49 @@
     </div>
 
     <hr class="my-4" />
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm rounded-4 border-0 p-3 text-center">
+                <h6 class="text-muted">Pending</h6>
+                <h3 class="text-warning fw-bold">@ViewBag.PendingCount</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm rounded-4 border-0 p-3 text-center">
+                <h6 class="text-muted">Verified</h6>
+                <h3 class="text-primary fw-bold">@ViewBag.VerifiedCount</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm rounded-4 border-0 p-3 text-center">
+                <h6 class="text-muted">Rejected</h6>
+                <h3 class="text-danger fw-bold">@ViewBag.RejectedCount</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm rounded-4 border-0 p-3 text-center">
+                <h6 class="text-muted">Approved</h6>
+                <h3 class="text-success fw-bold">@ViewBag.ApprovedCount</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm rounded-4 border-0 p-3">
+                <h5 class="fw-bold mb-3">Quick Actions</h5>
+
+                <a href="/Manager/Approval" class="btn btn-outline-primary rounded-pill me-2">Review Claims</a>
+                <a href="/Manager/Reports" class="btn btn-outline-secondary rounded-pill me-2">View Reports</a>
+                <a href="/Manager/AssignModules" class="btn btn-outline-dark rounded-pill">Assign Modules</a>
+            </div>
+        </div>
+    </div>
 
     <h5 class="mb-3">Recent Claims</h5>
     <div class="table-responsive">

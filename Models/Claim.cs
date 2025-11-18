@@ -67,6 +67,8 @@ namespace CMCSApplication.Models
 
         [Display(Name = "Date Verified")]
         public DateTime? DateVerified { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
 
         [Display(Name = "Date Approved")]
         public DateTime? DateApproved { get; set; }

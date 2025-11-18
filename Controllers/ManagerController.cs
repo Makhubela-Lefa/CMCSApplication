@@ -20,10 +20,28 @@ namespace CMCSApplication.Controllers
         {
             // Get the 5 most recent claims for display
             ViewBag.RecentClaims = _context.Claims
+                .Where(c => !c.IsDeleted)
                 .Include(c => c.Module)
                 .OrderByDescending(c => c.DateSubmitted)
                 .Take(5)
                 .ToList();
+
+            // Dashboard counters
+            ViewBag.PendingCount = _context.Claims
+                .Where(c => !c.IsDeleted && c.Status == "Pending")
+                .Count();
+
+            ViewBag.VerifiedCount = _context.Claims
+                .Where(c => !c.IsDeleted && c.Status == "Verified by Coordinator")
+                .Count();
+
+            ViewBag.RejectedCount = _context.Claims
+                .Where(c => !c.IsDeleted && (c.Status == "Rejected by Coordinator" || c.Status == "Rejected by Manager"))
+                .Count();
+
+            ViewBag.ApprovedCount = _context.Claims
+                .Where(c => !c.IsDeleted && c.Status == "Approved by Manager")
+                .Count();
 
             return View();
         }
@@ -32,7 +50,7 @@ namespace CMCSApplication.Controllers
         {
             // Get claims that are either Verified by Coordinator or Pending
             var claimsForManager = _context.Claims
-               .Where(c => c.Status == "Verified by Coordinator")
+               .Where(c => !c.IsDeleted && c.Status == "Verified by Coordinator")
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
@@ -42,7 +60,7 @@ namespace CMCSApplication.Controllers
         // Review a single verified claim
         public IActionResult Review(int id)
         {
-            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id && !c.IsDeleted);
             if (claim == null)
             {
                 TempData["Error"] = "Claim not found.";
@@ -78,7 +96,7 @@ namespace CMCSApplication.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Reject(int id)
         {
-            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id && !c.IsDeleted);
             if (claim == null)
             {
                 TempData["Error"] = "Claim not found.";
@@ -99,14 +117,19 @@ namespace CMCSApplication.Controllers
         // Reports page
         public IActionResult Reports()
         {
-            // Get all claims
-            var claims = _context.Claims.ToList();
+            // Get all APPROVED claims (manager-approved)
+            var claims = _context.Claims
+                .Where(c => !c.IsDeleted && c.ManagerStatus == "Approved")
+                .ToList();
 
             // Total claims
             ViewBag.TotalClaims = claims.Count;
 
-            // Total payout (sum of all TotalAmount)
+            // Total payout
             ViewBag.TotalPayout = claims.Sum(c => c.TotalAmount);
+
+            // Total hours (add this)
+            ViewBag.TotalHours = claims.Sum(c => c.HoursWorked);
 
             // Department breakdown
             ViewBag.DepartmentTotals = claims
@@ -114,12 +137,66 @@ namespace CMCSApplication.Controllers
                 .Select(g => new
                 {
                     Department = g.Key,
-                    TotalAmount = g.Sum(c => c.TotalAmount)
+                    TotalAmount = g.Sum(c => c.TotalAmount),
+
+                    // hours per department
+                    TotalHours = g.Sum(c => c.HoursWorked)
                 })
                 .ToList();
 
             return View();
         }
+
+        public IActionResult DownloadReportPDF()
+        {
+            var claims = _context.Claims
+                .Where(c => !c.IsDeleted && c.ManagerStatus == "Approved")
+                .ToList();
+
+            using (var ms = new MemoryStream())
+            {
+                var document = new iTextSharp.text.Document();
+                iTextSharp.text.pdf.PdfWriter.GetInstance(document, ms);
+
+                document.Open();
+
+                // Title
+                var titleFont = iTextSharp.text.FontFactory.GetFont("Arial", 16, iTextSharp.text.Font.BOLD);
+                document.Add(new iTextSharp.text.Paragraph("Monthly Claim Report", titleFont));
+                document.Add(new iTextSharp.text.Paragraph("\n"));
+
+                // Summary Section
+                document.Add(new iTextSharp.text.Paragraph($"Total Claims: {claims.Count}"));
+                document.Add(new iTextSharp.text.Paragraph($"Total Payout: R {claims.Sum(c => c.TotalAmount):N2}"));
+                document.Add(new iTextSharp.text.Paragraph($"Total Hours Worked: {claims.Sum(c => c.HoursWorked)} hrs"));
+                document.Add(new iTextSharp.text.Paragraph("\n"));
+
+                // Table with details
+                var table = new iTextSharp.text.pdf.PdfPTable(5);
+                table.WidthPercentage = 100;
+
+                table.AddCell("Lecturer");
+                table.AddCell("Department");
+                table.AddCell("Month");
+                table.AddCell("Hours");
+                table.AddCell("Amount");
+
+                foreach (var c in claims)
+                {
+                    table.AddCell(c.LecturerName);
+                    table.AddCell(c.Department);
+                    table.AddCell(c.Month);
+                    table.AddCell(c.HoursWorked.ToString());
+                    table.AddCell($"R {c.TotalAmount:N2}");
+                }
+
+                document.Add(table);
+                document.Close();
+
+                return File(ms.ToArray(), "application/pdf", "MonthlyClaimReport.pdf");
+            }
+        }
+
 
         // GET: Assign Modules
         public IActionResult AssignModules()
@@ -205,7 +282,7 @@ namespace CMCSApplication.Controllers
         // GET: Manager/EditClaim/5
         public IActionResult EditClaim(int id)
         {
-            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id && !c.IsDeleted);
             if (claim == null)
             {
                 TempData["Error"] = "Claim not found.";
@@ -264,7 +341,7 @@ namespace CMCSApplication.Controllers
                 return RedirectToAction("Approval");
             }
 
-            _context.Claims.Remove(claim);
+            claim.IsDeleted = true;
             _context.SaveChanges();
             TempData["Success"] = "Claim deleted successfully!";
             return RedirectToAction("Approval");

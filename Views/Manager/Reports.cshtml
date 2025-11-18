@@ -18,7 +18,13 @@
                     <h5 class="card-title fw-bold">Summary Report</h5>
                     <p>Total Claims: <span class="fw-semibold text-success">@ViewBag.TotalClaims</span></p>
                     <p>Total Payout: <span class="fw-semibold text-success">R @(ViewBag.TotalPayout.ToString("N2"))</span></p>
-                    <button class="btn btn-outline-primary btn-sm">Download PDF</button>
+                    <p>Total Hours Worked: <span class="fw-semibold text-success">@ViewBag.TotalHours</span></p>
+                    <a asp-action="DownloadReportPdf"
+                       asp-controller="Manager"
+                       class="btn btn-outline-primary btn-sm rounded-pill">
+                        Download PDF
+                    </a>
+
                 </div>
             </div>
         </div>
@@ -32,7 +38,12 @@
                         @foreach (var dept in ViewBag.DepartmentTotals)
                         {
                             <li class="list-group-item d-flex justify-content-between">
-                                @dept.Department <span class="fw-bold">R @(dept.TotalAmount.ToString("N2"))</span>
+                                <span>@dept.Department</span>
+
+                                <span>
+                                    <span class="fw-bold">R @(dept.TotalAmount.ToString("N2"))</span>
+                                    <span class="text-muted ms-2">(@dept.TotalHours hrs)</span>
+                                </span>
                             </li>
                         }
                     </ul>
