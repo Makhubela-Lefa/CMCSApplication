@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CMCSApplication.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Coordinator")]
     public class CoordinatorController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,15 +16,11 @@ namespace CMCSApplication.Controllers
             _context = context;
         }
 
-        // Coordinator Home
+        // DASHBOARD
         public IActionResult Index()
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
-                return RedirectToAction("Login", "Account");
-
             var pendingCount = _context.Claims.Count(c => c.Status == "Pending Verification");
-            var verifiedCount = _context.Claims.Count(c => c.Status == "Verified");
+            var verifiedCount = _context.Claims.Count(c => c.Status == "Verified by Coordinator");
             var rejectedCount = _context.Claims.Count(c => c.Status == "Rejected by Coordinator");
 
             ViewBag.PendingCount = pendingCount;
@@ -34,60 +30,22 @@ namespace CMCSApplication.Controllers
             return View();
         }
 
-
-        // View all Pending Claims for Verification
+        // VIEW PENDING CLAIMS
         public IActionResult VerifyQueue()
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
-                return RedirectToAction("Login", "Account");
-
             var pendingClaims = _context.Claims
                 .Where(c => c.Status == "Pending Verification")
+                .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
             return View(pendingClaims);
         }
 
 
+        // APPROVE A CLAIM
         [HttpPost]
         public IActionResult Approve(int id)
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
-                return RedirectToAction("Login", "Account");
-
-            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
-            if (claim != null)
-            {
-                claim.Status = "Verified by Coordinator";
-                claim.CoordinatorStatus = "Verified";
-                claim.DateVerified = DateTime.Now;
-                claim.CoordinatorId = username;
-
-
-                _context.Update(claim);
-                _context.SaveChanges();
-
-                TempData["SuccessMessage"] = "Claim approved and ready for manager!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Claim not found.";
-            }
-
-            return RedirectToAction(nameof(VerifyQueue));
-        }
-
-        [HttpPost]
-        public IActionResult Reject(int id)
-        {
-            // 1. Ensure coordinator is logged in
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
-                return RedirectToAction("Login", "Account");
-
-            // 2. Retrieve the claim
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
             if (claim == null)
             {
@@ -95,40 +53,58 @@ namespace CMCSApplication.Controllers
                 return RedirectToAction(nameof(VerifyQueue));
             }
 
-            // 3. Update claim details
-            claim.Status = "Rejected by Coordinator";
-            claim.CoordinatorStatus = "Rejected";
+            string coordinatorUsername = User.Identity!.Name!;
+
+            claim.Status = "Verified by Coordinator";
+            claim.CoordinatorStatus = "Verified";
             claim.DateVerified = DateTime.Now;
-            claim.CoordinatorId = username; // Store coordinator username
+            claim.CoordinatorId = coordinatorUsername;
 
             _context.Update(claim);
             _context.SaveChanges();
 
-            // 4. Feedback
-            TempData["ErrorMessage"] = "Claim rejected by coordinator.";
-
+            TempData["SuccessMessage"] = "Claim verified successfully!";
             return RedirectToAction(nameof(VerifyQueue));
         }
 
-        // View all claims for review (simplified, no filters)
+        // REJECT CLAIM
+        [HttpPost]
+        public IActionResult Reject(int id)
+        {
+            var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+            if (claim == null)
+            {
+                TempData["ErrorMessage"] = "Claim not found.";
+                return RedirectToAction(nameof(VerifyQueue));
+            }
+
+            string coordinatorUsername = User.Identity!.Name!;
+
+            claim.Status = "Rejected by Coordinator";
+            claim.CoordinatorStatus = "Rejected";
+            claim.DateVerified = DateTime.Now;
+            claim.CoordinatorId = coordinatorUsername;
+
+            _context.Update(claim);
+            _context.SaveChanges();
+
+            TempData["ErrorMessage"] = "Claim rejected.";
+            return RedirectToAction(nameof(VerifyQueue));
+        }
+
+
+        // REVIEW QUEUE (view all: pending, verified, rejected)
         public IActionResult ReviewQueue()
         {
-            // Ensure coordinator is logged in
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
-                return RedirectToAction("Login", "Account");
-
-            // Fetch all claims relevant to coordinator review
             var claims = _context.Claims
                 .Where(c =>
                     c.Status == "Pending Verification" ||
                     c.Status == "Verified by Coordinator" ||
                     c.Status == "Rejected by Coordinator")
+                .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
             return View(claims);
         }
-
-
     }
 }
