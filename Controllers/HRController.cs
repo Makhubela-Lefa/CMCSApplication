@@ -17,18 +17,17 @@ namespace CMCSApplication.Controllers
             _context = context;
         }
 
-        // =============================
         // LIST ALL USERS
-        // =============================
+        
         public IActionResult Index()
         {
             var users = _context.Users.ToList();
             return View(users);
         }
 
-        // =============================
+       
         // CREATE NEW USER
-        // =============================
+        
         public IActionResult Create()
         {
             return View();
@@ -65,9 +64,9 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Index");
         }
 
-        // =============================
+       
         // EDIT USER
-        // =============================
+        
         public IActionResult Edit(int id)
         {
             var user = _context.Users.Find(id);
@@ -101,9 +100,8 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Index");
         }
 
-        // =============================
         // USER DETAILS
-        // =============================
+        
         public IActionResult Details(int id)
         {
             var user = _context.Users.Find(id);
@@ -112,9 +110,8 @@ namespace CMCSApplication.Controllers
             return View(user);
         }
 
-        // =============================
         // DELETE USER
-        // =============================
+        
         public IActionResult Delete(int id)
         {
             var user = _context.Users.Find(id);
@@ -147,9 +144,8 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Index");
         }
 
-        // =============================
         // VIEW ALL CLAIMS
-        // =============================
+        
         public IActionResult ViewClaims()
         {
             var claims = _context.Claims.ToList();

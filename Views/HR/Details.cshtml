@@ -1,11 +1,38 @@
 ﻿@model CMCSApplication.Models.User
 
-<h2>Delete User</h2>
+@{
+    ViewData["Title"] = "User Details";
+}
 
-<p>Are you sure you want to delete <strong>@Model.Name @Model.Surname</strong>?</p>
+<div class="container py-4">
+    <h2 class="mb-4">User Details</h2>
 
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button class="btn btn-danger">Yes, Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+    <div class="card shadow-sm p-4">
+        <dl class="row">
+
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">@Model.Name @Model.Surname</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Username</dt>
+            <dd class="col-sm-9">@Model.Username</dd>
+
+            <dt class="col-sm-3">Role</dt>
+            <dd class="col-sm-9">@Model.Role</dd>
+
+            @if (Model.Role == "Lecturer")
+            {
+                <dt class="col-sm-3">Hourly Rate</dt>
+                <dd class="col-sm-9">R @Model.HourlyRate</dd>
+            }
+
+        </dl>
+
+        <div class="mt-3">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>

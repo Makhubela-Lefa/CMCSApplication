@@ -1,7 +1,8 @@
 ﻿using System.Security.Claims;
 using CMCSApplication.Data;
+using CMCSApplication.Models;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMCSApplication.Controllers
@@ -11,51 +12,80 @@ namespace CMCSApplication.Controllers
         private readonly ApplicationDbContext _context;
         public AccountController(ApplicationDbContext context) => _context = context;
 
-        // GET: /Account/Login
+        // LOGIN (GET)
         public IActionResult Login()
         {
-            var lecturers = _context.Lecturers.OrderBy(l => l.Name).ToList();
-            return View(lecturers);
+            return View();
         }
 
-        // POST: /Account/Login
+        // LOGIN (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(int lecturerId)
+        public async Task<IActionResult> Login(string username, string password)
         {
-            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
-            if (lecturer == null)
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                TempData["Error"] = "Lecturer not found";
-                return RedirectToAction(nameof(Login));
+                TempData["Error"] = "Enter both username and password.";
+                return View();
             }
 
-            // Session (still allowed to keep for convenience) 
-            HttpContext.Session.SetInt32("LecturerId", lecturer.Id);
-            HttpContext.Session.SetString("LecturerName", lecturer.Name);
+            var user = _context.Users
+                .FirstOrDefault(u => u.Username == username && u.Password == password);
 
-            // Cookie Authentication (required for [Authorize]) 
-            var claims = new[]
+            if (user == null)
             {
-        new Claim("LecturerId", lecturer.Id.ToString()),
-        new Claim(ClaimTypes.Name, lecturer.Name)
-    };
+                TempData["Error"] = "Invalid login credentials.";
+                return View();
+            }
 
-            var identity = new ClaimsIdentity(claims, "Cookies");
+            // Save session (optional but useful for quick display)
+            HttpContext.Session.SetString("Username", user.Username);
+            HttpContext.Session.SetString("Role", user.Role);
+            HttpContext.Session.SetInt32("UserId", user.Id);
+
+            // Create cookie authentication claims
+            var claims = new List<System.Security.Claims.Claim>
+            {
+                new System.Security.Claims.Claim(ClaimTypes.Name, user.Username),
+                new System.Security.Claims.Claim(ClaimTypes.Role, user.Role),
+                new System.Security.Claims.Claim("UserId", user.Id.ToString())
+            };
+
+            // If user is a lecturer, store LecturerId for claims
+            if (user.Role == "Lecturer" && user.LecturerId.HasValue)
+            {
+                claims.Add(new System.Security.Claims.Claim("LecturerId", user.LecturerId.Value.ToString()));
+            }
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync("Cookies", principal);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal);
 
-            TempData["SuccessMessage"] = $"Logged in as {lecturer.Name}";
-            return RedirectToAction("Index", "Lecturer");
+            TempData["SuccessMessage"] = $"Welcome {user.Username}";
+
+            // Role-based redirect
+            return user.Role switch
+            {
+                "HR" => RedirectToAction("Index", "HR"),
+                "Manager" => RedirectToAction("Index", "Manager"),
+                "Coordinator" => RedirectToAction("VerifyQueue", "Coordinator"),
+                "Lecturer" => RedirectToAction("Index", "Lecturer"),
+                _ => RedirectToAction("Index", "Home")
+            };
         }
 
-        public IActionResult Logout()
+        // LOGOUT
+        [HttpPost]
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Remove("LecturerId");
-            HttpContext.Session.Remove("LecturerName");
-            TempData["SuccessMessage"] = "Logged out";
-            return RedirectToAction("Login");
+            HttpContext.Session.Clear();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            TempData["SuccessMessage"] = "Logged out successfully.";
+            return RedirectToAction(nameof(Login));
         }
     }
 }

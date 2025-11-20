@@ -1,29 +1,59 @@
 ﻿@model IEnumerable<CMCSApplication.Models.Claim>
 
-<h2>All Claims</h2>
+@{
+    ViewData["Title"] = "All Claims";
+}
 
-<table class="table table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>Lecturer</th>
-            <th>Department</th>
-            <th>Month</th>
-            <th>Hours</th>
-            <th>Amount</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model)
-        {
-            <tr>
-                <td>@c.LecturerName</td>
-                <td>@c.Department</td>
-                <td>@c.Month</td>
-                <td>@c.HoursWorked</td>
-                <td>@c.TotalAmount</td>
-                <td>@c.Status</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="container py-4">
+
+    <h2 class="mb-4">All Claims</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Lecturer</th>
+                        <th>Department</th>
+                        <th>Month</th>
+                        <th>Hours</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td>@c.LecturerName</td>
+                            <td>@c.Department</td>
+                            <td>@c.Month</td>
+                            <td>@c.HoursWorked</td>
+                            <td>R @c.TotalAmount</td>
+
+                            <td>
+                                @if (c.Status.Contains("Rejected"))
+                                {
+                                    <span class="badge bg-danger">@c.Status</span>
+                                }
+                                else if (c.Status.Contains("Verified") || c.Status.Contains("Approved"))
+                                {
+                                    <span class="badge bg-success">@c.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@c.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>

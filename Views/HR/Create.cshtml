@@ -1,47 +1,83 @@
 ﻿@model CMCSApplication.Models.User
 
-<h2>Add New User</h2>
+@{
+    ViewData["Title"] = "Add New User";
+}
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" />
-    </div>
+<div class="container py-4">
+    <h2 class="mb-4">Add New User</h2>
 
-    <div class="mb-3">
-        <label>Surname</label>
-        <input asp-for="Surname" class="form-control" />
-    </div>
+    <form asp-action="Create" method="post" class="card shadow-sm p-4">
 
-    <div class="mb-3">
-        <label>Email</label>
-        <input asp-for="Email" class="form-control" />
-    </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-        <label>Username</label>
-        <input asp-for="Username" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
 
-    <div class="mb-3">
-        <label>Password</label>
-        <input asp-for="Password" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label asp-for="Surname" class="form-label"></label>
+            <input asp-for="Surname" class="form-control" />
+            <span asp-validation-for="Surname" class="text-danger"></span>
+        </div>
 
-    <div class="mb-3">
-        <label>Role</label>
-        <select asp-for="Role" class="form-control">
-            <option>Lecturer</option>
-            <option>Coordinator</option>
-            <option>Manager</option>
-            <option>HR</option>
-        </select>
-    </div>
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
 
-    <div class="mb-3">
-        <label>Hourly Rate (Lecturer only)</label>
-        <input asp-for="HourlyRate" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
 
-    <button class="btn btn-success">Save</button>
-</form>
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label"></label>
+            <select asp-for="Role" class="form-select" id="roleSelect">
+                <option disabled selected>-- Select Role --</option>
+                <option value="Lecturer">Lecturer</option>
+                <option value="Coordinator">Coordinator</option>
+                <option value="Manager">Manager</option>
+                <option value="HR">HR</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3" id="hourlyRateContainer" style="display:none;">
+            <label asp-for="HourlyRate" class="form-label">Hourly Rate (Lecturer only)</label>
+            <input asp-for="HourlyRate" class="form-control" />
+            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+        </div>
+
+        <button class="btn btn-success">Save User</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const roleSelect = document.getElementById("roleSelect");
+        const hourlyRate = document.getElementById("hourlyRateContainer");
+
+        function toggleRate() {
+            if (roleSelect.value === "Lecturer") {
+                hourlyRate.style.display = "block";
+            } else {
+                hourlyRate.style.display = "none";
+            }
+        }
+
+        roleSelect.addEventListener("change", toggleRate);
+    </script>
+}

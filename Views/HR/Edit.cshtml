@@ -1,39 +1,73 @@
 ﻿@model CMCSApplication.Models.User
 
-<h2>Edit User</h2>
+@{
+    ViewData["Title"] = "Edit User";
+}
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+<div class="container py-4">
+    <h2 class="mb-4">Edit User</h2>
 
-    <div class="mb-3">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" />
-    </div>
+    <form asp-action="Edit" method="post" class="card shadow-sm p-4">
 
-    <div class="mb-3">
-        <label>Surname</label>
-        <input asp-for="Surname" class="form-control" />
-    </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-        <label>Email</label>
-        <input asp-for="Email" class="form-control" />
-    </div>
+        <input type="hidden" asp-for="Id" />
 
-    <div class="mb-3">
-        <label>Role</label>
-        <select asp-for="Role" class="form-control">
-            <option>Lecturer</option>
-            <option>Coordinator</option>
-            <option>Manager</option>
-            <option>HR</option>
-        </select>
-    </div>
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
 
-    <div class="mb-3">
-        <label>Hourly Rate</label>
-        <input asp-for="HourlyRate" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label asp-for="Surname" class="form-label"></label>
+            <input asp-for="Surname" class="form-control" />
+            <span asp-validation-for="Surname" class="text-danger"></span>
+        </div>
 
-    <button class="btn btn-warning">Save Changes</button>
-</form>
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label"></label>
+            <select asp-for="Role" class="form-select" id="roleSelect">
+                <option value="Lecturer">Lecturer</option>
+                <option value="Coordinator">Coordinator</option>
+                <option value="Manager">Manager</option>
+                <option value="HR">HR</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3" id="hourlyRateContainer">
+            <label asp-for="HourlyRate" class="form-label">Hourly Rate (Lecturer only)</label>
+            <input asp-for="HourlyRate" class="form-control" />
+            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+        </div>
+
+        <button class="btn btn-warning">Save Changes</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const roleSelect = document.getElementById("roleSelect");
+        const hourlyRate = document.getElementById("hourlyRateContainer");
+
+        function toggleRateEdit() {
+            if (roleSelect.value === "Lecturer") {
+                hourlyRate.style.display = "block";
+            } else {
+                hourlyRate.style.display = "none";
+            }
+        }
+
+        toggleRateEdit(); // Run on load
+        roleSelect.addEventListener("change", toggleRateEdit);
+    </script>
+}
