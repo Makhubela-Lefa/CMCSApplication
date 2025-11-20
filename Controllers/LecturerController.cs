@@ -1,9 +1,11 @@
 ﻿using CMCSApplication.Data;
 using CMCSApplication.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMCSApplication.Controllers
 {
+    [Authorize]
     public class LecturerController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,6 +19,7 @@ namespace CMCSApplication.Controllers
         public IActionResult Index()
         {
             var recentClaims = _context.Claims
+                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.DateSubmitted)
                 .Take(5)
                 .ToList();
@@ -33,35 +36,38 @@ namespace CMCSApplication.Controllers
         // View All Submitted Claims
         public IActionResult MyClaims()
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
+            var lecturerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "LecturerId");
+            if (lecturerIdClaim == null)
                 return RedirectToAction("Login", "Account");
 
-            // get lecturer profile
-            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Username == username);
+            int lecturerId = int.Parse(lecturerIdClaim.Value);
+
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
             if (lecturer == null)
                 return NotFound("Lecturer profile not found.");
 
-            // only fetch claims that belong to this lecturer
             var claims = _context.Claims
-                .Where(c => c.LecturerId == lecturer.Id)
+                .Where(c => c.LecturerId == lecturer.Id && !c.IsDeleted)
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
             return View(claims);
         }
 
+
         // GET: Lecturer/Submit
         [HttpGet]
         public IActionResult Submit()
         {
-            // ❗ Lecturer must be logged in
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
+            // Lecturer must be logged in
+            var lecturerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "LecturerId");
+            if (lecturerIdClaim == null)
                 return RedirectToAction("Login", "Account");
 
-            // ❗ Pull lecturer info
-            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Username == username);
+            int lecturerId = int.Parse(lecturerIdClaim.Value);
+
+            // Pull lecturer info
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
             if (lecturer == null)
                 return NotFound("Lecturer profile not found.");
 
@@ -81,11 +87,13 @@ namespace CMCSApplication.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Submit(Claim claim)
         {
-            var username = HttpContext.Session.GetString("Username");
-            if (username == null)
+            var lecturerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "LecturerId");
+            if (lecturerIdClaim == null)
                 return RedirectToAction("Login", "Account");
 
-            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Username == username);
+            int lecturerId = int.Parse(lecturerIdClaim.Value);
+
+            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
             if (lecturer == null)
                 return NotFound("Lecturer profile not found.");
 
@@ -93,6 +101,10 @@ namespace CMCSApplication.Controllers
             claim.LecturerId = lecturer.Id;
             claim.LecturerName = lecturer.Name;
             claim.HourlyRate = lecturer.HourlyRate;
+            claim.Amount = claim.HoursWorked * lecturer.HourlyRate;
+            claim.Username = User.Identity.Name;
+            claim.Status = "Submitted";
+            claim.DateSubmitted = DateTime.Now;
 
             // Validation: maximum is 180 hours
             if (claim.HoursWorked > 180)
@@ -153,10 +165,19 @@ namespace CMCSApplication.Controllers
         [HttpGet]
         public IActionResult Upload()
         {
-            var claims = _context.Claims.ToList();
+            var lecturerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "LecturerId");
+            if (lecturerIdClaim == null)
+                return RedirectToAction("Login", "Account");
+
+            var claims = _context.Claims
+                .Where(c => !c.IsDeleted)
+                .ToList();
+
             ViewBag.Claims = claims;
+
             return View();
         }
+
 
         // POST: Handle file upload for a specific claim
         [HttpPost]
@@ -222,7 +243,8 @@ namespace CMCSApplication.Controllers
                 return RedirectToAction("MyClaims");
             }
 
-            _context.Claims.Remove(claim);
+            claim.IsDeleted = true;
+            _context.Claims.Update(claim);
             _context.SaveChanges();
             TempData["SuccessMessage"] = "Claim deleted successfully!";
             return RedirectToAction("MyClaims");

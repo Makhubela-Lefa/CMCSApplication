@@ -28,6 +28,15 @@ namespace CMCSApplication
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Cookies
+            builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Login";
+    });
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 

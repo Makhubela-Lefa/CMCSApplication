@@ -29,50 +29,57 @@
             <form asp-action="Submit" asp-controller="Lecturer" method="post" enctype="multipart/form-data">
                 <div class="row g-3">
 
-                    <!-- Lecturer Name (READ ONLY) -->
+                    <!-- Lecturer Name (readonly) -->
                     <div class="col-md-6">
-                        <label class="form-label">Lecturer Name</label>
+                        <label class="form-label fw-semibold">Lecturer Name</label>
                         <input class="form-control" value="@Model.LecturerName" readonly />
                     </div>
 
-                    <!-- Department (editable) -->
+                    <!-- Department -->
                     <div class="col-md-6">
-                        <label asp-for="Department" class="form-label"></label>
+                        <label asp-for="Department" class="form-label fw-semibold"></label>
                         <input asp-for="Department" class="form-control" placeholder="e.g., Computer Science" />
                         <span asp-validation-for="Department" class="text-danger"></span>
                     </div>
 
                     <!-- Month -->
                     <div class="col-md-4">
-                        <label asp-for="Month" class="form-label"></label>
+                        <label asp-for="Month" class="form-label fw-semibold"></label>
                         <input asp-for="Month" class="form-control" placeholder="e.g., October 2025" />
                         <span asp-validation-for="Month" class="text-danger"></span>
                     </div>
 
                     <!-- Hours Worked -->
                     <div class="col-md-4">
-                        <label asp-for="HoursWorked" class="form-label"></label>
+                        <label asp-for="HoursWorked" class="form-label fw-semibold"></label>
                         <input asp-for="HoursWorked" class="form-control" placeholder="e.g., 24" />
                         <span asp-validation-for="HoursWorked" class="text-danger"></span>
                     </div>
 
-                    <!-- Hourly Rate (READ ONLY - pulled from Lecturer) -->
+                    <!-- Hourly Rate (readonly) -->
                     <div class="col-md-4">
-                        <label class="form-label">Hourly Rate (Auto)</label>
+                        <label class="form-label fw-semibold">Hourly Rate (Auto)</label>
                         <input class="form-control" value="@Model.HourlyRate" readonly />
                     </div>
 
+                    <!-- Total Amount (Auto) -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Total Amount (Auto)</label>
+                        <input id="TotalAmount" class="form-control" readonly />
+                    </div>
+
                     <!-- File Upload -->
-                    <div class="col-md-12">
-                        <label asp-for="UploadFile" class="form-label">Supporting Document (PDF, DOCX, XLSX)</label>
+                    <div class="col-12">
+                        <label asp-for="UploadFile" class="form-label fw-semibold">Supporting Document</label>
                         <input asp-for="UploadFile" type="file" class="form-control" accept=".pdf,.docx,.xlsx" />
+                        <small class="text-muted">Allowed: PDF, DOCX, XLSX</small>
                         <span asp-validation-for="UploadFile" class="text-danger"></span>
                     </div>
 
                     <!-- Notes -->
                     <div class="col-12">
-                        <label asp-for="Notes" class="form-label"></label>
-                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+                        <label asp-for="Notes" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Notes" rows="3" class="form-control" placeholder="Optional notes..."></textarea>
                         <span asp-validation-for="Notes" class="text-danger"></span>
                     </div>
 
@@ -80,8 +87,9 @@
 
                 <div class="mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-success px-4">Submit</button>
-                    <a class="btn btn-outline-secondary px-4" asp-controller="Lecturer" asp-action="Index">Back</a>
+                    <a asp-controller="Lecturer" asp-action="Index" class="btn btn-outline-secondary px-4">Back</a>
                 </div>
+
             </form>
         </div>
     </div>
@@ -89,4 +97,22 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+
+            function calculateTotal() {
+                let hours = parseFloat($("#HoursWorked").val()) || 0;
+                let rate = parseFloat("@Model.HourlyRate") || 0;
+
+                let total = hours * rate;
+                $("#TotalAmount").val(total.toFixed(2));
+            }
+
+            $("#HoursWorked").on("input", calculateTotal);
+
+            calculateTotal();
+        });
+    </script>
 }
+

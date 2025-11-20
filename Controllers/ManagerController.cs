@@ -1,11 +1,13 @@
 ﻿using System.Linq;
 using CMCSApplication.Data;
 using CMCSApplication.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CMCSApplication.Controllers
 {
+    [Authorize]
     public class ManagerController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -147,7 +149,7 @@ namespace CMCSApplication.Controllers
             return View();
         }
 
-        public IActionResult DownloadReportPDF()
+        public IActionResult DownloadReportPdf()
         {
             var claims = _context.Claims
                 .Where(c => !c.IsDeleted && c.ManagerStatus == "Approved")

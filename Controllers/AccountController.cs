@@ -1,4 +1,7 @@
-﻿using CMCSApplication.Data;
+﻿using System.Security.Claims;
+using CMCSApplication.Data;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMCSApplication.Controllers
@@ -18,7 +21,7 @@ namespace CMCSApplication.Controllers
         // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(int lecturerId)
+        public async Task<IActionResult> Login(int lecturerId)
         {
             var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
             if (lecturer == null)
@@ -27,8 +30,21 @@ namespace CMCSApplication.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
+            // --- Session (still allowed to keep for convenience) ---
             HttpContext.Session.SetInt32("LecturerId", lecturer.Id);
             HttpContext.Session.SetString("LecturerName", lecturer.Name);
+
+            // --- Cookie Authentication (required for [Authorize]) ---
+            var claims = new[]
+            {
+        new Claim("LecturerId", lecturer.Id.ToString()),
+        new Claim(ClaimTypes.Name, lecturer.Name)
+    };
+
+            var identity = new ClaimsIdentity(claims, "Cookies");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("Cookies", principal);
 
             TempData["SuccessMessage"] = $"Logged in as {lecturer.Name}";
             return RedirectToAction("Index", "Lecturer");
