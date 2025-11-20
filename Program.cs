@@ -10,11 +10,11 @@ namespace CMCSApplication
             var builder = WebApplication.CreateBuilder(args);
 
             //  Add DbContext and SQL Server connection (add above services)
-            // --- Real SQL Server connection (disabled for testing) ---
+            // Real SQL Server connection (disabled for testing) 
              builder.Services.AddDbContext<ApplicationDbContext>(options =>
               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // --- In-memory database for testing ---
+            // In-memory database for testing 
            // builder.Services.AddDbContext<ApplicationDbContext>(options =>
                // options.UseInMemoryDatabase("TestDatabase"));
             builder.Services.AddDistributedMemoryCache();

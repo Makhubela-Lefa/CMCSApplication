@@ -1,0 +1,35 @@
+﻿@model IEnumerable<CMCSApplication.Models.User>
+
+<h2>All Users</h2>
+
+<a class="btn btn-primary mb-3" asp-action="Create">Add User</a>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Rate</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.Name @u.Surname</td>
+                <td>@u.Username</td>
+                <td>@u.Role</td>
+                <td>@u.Email</td>
+                <td>@u.HourlyRate</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@u.Id" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

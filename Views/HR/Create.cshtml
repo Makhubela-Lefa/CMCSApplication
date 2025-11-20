@@ -1,0 +1,47 @@
+﻿@model CMCSApplication.Models.User
+
+<h2>Add New User</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Surname</label>
+        <input asp-for="Surname" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Username</label>
+        <input asp-for="Username" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Password</label>
+        <input asp-for="Password" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Role</label>
+        <select asp-for="Role" class="form-control">
+            <option>Lecturer</option>
+            <option>Coordinator</option>
+            <option>Manager</option>
+            <option>HR</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Hourly Rate (Lecturer only)</label>
+        <input asp-for="HourlyRate" class="form-control" />
+    </div>
+
+    <button class="btn btn-success">Save</button>
+</form>

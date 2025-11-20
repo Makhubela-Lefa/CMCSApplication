@@ -1,0 +1,29 @@
+﻿@model IEnumerable<CMCSApplication.Models.Claim>
+
+<h2>All Claims</h2>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Lecturer</th>
+            <th>Department</th>
+            <th>Month</th>
+            <th>Hours</th>
+            <th>Amount</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.LecturerName</td>
+                <td>@c.Department</td>
+                <td>@c.Month</td>
+                <td>@c.HoursWorked</td>
+                <td>@c.TotalAmount</td>
+                <td>@c.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>

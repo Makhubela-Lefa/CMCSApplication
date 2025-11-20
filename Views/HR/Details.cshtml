@@ -1,0 +1,11 @@
+﻿@model CMCSApplication.Models.User
+
+<h2>Delete User</h2>
+
+<p>Are you sure you want to delete <strong>@Model.Name @Model.Surname</strong>?</p>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button class="btn btn-danger">Yes, Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

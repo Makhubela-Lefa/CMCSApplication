@@ -14,9 +14,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CMCS</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">CMCS</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -24,37 +24,63 @@
 
                     <ul class="navbar-nav flex-grow-1">
 
+                        <!-- Home always visible -->
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
 
-                        @if (Context.Session.GetString("Username") != null)
-                        {
-                            <!-- Only show role links AFTER login -->
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Lecturer" asp-action="Index">Lecturers</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Manager" asp-action="Index">Academic Managers</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Coordinator" asp-action="Index">Coordinators</a>
-                            </li>
+                        @{
+                            var username = Context.Session.GetString("Username");
+                            var role = Context.Session.GetString("Role");
                         }
+
+                        @if (username != null)
+                        {
+                            <!-- LECTURER -->
+                            @if (role == "Lecturer")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Lecturer" asp-action="Index">Lecturer Dashboard</a>
+                                </li>
+                            }
+
+                            <!-- COORDINATOR -->
+                            @if (role == "Coordinator")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Coordinator" asp-action="Index">Coordinator Dashboard</a>
+                                </li>
+                            }
+
+                            <!-- MANAGER -->
+                            @if (role == "Manager")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Manager" asp-action="Index">Manager Dashboard</a>
+                                </li>
+                            }
+
+                            <!-- HR -->
+                            @if (role == "HR")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="HR" asp-action="Index">HR Dashboard</a>
+                                </li>
+                            }
+                        }
+
                     </ul>
 
+                    <!-- LOGIN / LOGOUT BUTTONS -->
                     <ul class="navbar-nav">
-
-                        @if (Context.Session.GetString("Username") == null)
+                        @if (username == null)
                         {
-                            <!-- If NOT logged in -->
                             <li class="nav-item">
                                 <a class="btn btn-primary" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                         }
                         else
                         {
-                            <!-- If logged in -->
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post">
                                     <button type="submit" class="btn btn-danger">Logout</button>
@@ -64,11 +90,10 @@
                     </ul>
 
                 </div>
-
-                    </div>
-                </nav>
-       
+            </div>
+        </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -77,12 +102,15 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - CMCSApplication - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - CMCSApplication -
+            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
