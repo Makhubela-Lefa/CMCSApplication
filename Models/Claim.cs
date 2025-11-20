@@ -46,7 +46,7 @@ namespace CMCSApplication.Models
 
         [Display(Name = "Original File Name")]
         public string? OriginalFileName { get; set; }
-        public string FilePath { get; set; }
+        public string? FilePath { get; set; }
 
         [StringLength(500)]
         public string? Notes { get; set; }

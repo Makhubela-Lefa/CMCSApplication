@@ -29,7 +29,8 @@ namespace CMCSApplication.Controllers
                 .Count(c => !c.IsDeleted && c.Status == "Verified by Coordinator");
 
             ViewBag.RejectedCount = _context.Claims
-                .Count(c => !c.IsDeleted && (c.Status == "Rejected by Coordinator" || c.Status == "Rejected by Manager"));
+                .Count(c => !c.IsDeleted &&
+                    (c.Status == "Rejected by Coordinator" || c.Status == "Rejected by Manager"));
 
             ViewBag.ApprovedCount = _context.Claims
                 .Count(c => !c.IsDeleted && c.Status == "Approved by Manager");
@@ -37,7 +38,7 @@ namespace CMCSApplication.Controllers
             return View();
         }
 
-        // CLAIMS WAITING FOR MANAGER APPROVAL
+        // CLAIMS WAITING FOR APPROVAL
         public IActionResult Approval()
         {
             var claims = _context.Claims
@@ -63,23 +64,22 @@ namespace CMCSApplication.Controllers
             return View(claim);
         }
 
-        // APPROVE
+        // APPROVE CLAIM
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Approve(int id)
         {
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id);
+
             if (claim == null)
             {
                 TempData["Error"] = "Claim not found.";
                 return RedirectToAction("Approval");
             }
 
-            string managerUsername = User.Identity!.Name!;
-
             claim.Status = "Approved by Manager";
             claim.ManagerStatus = "Approved";
-            claim.ManagerId = managerUsername;
+            claim.ManagerId = User.Identity!.Name!;
             claim.DateApproved = DateTime.Now;
 
             _context.SaveChanges();
@@ -88,23 +88,22 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Approval");
         }
 
-        // REJECT
+        // REJECT CLAIM
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Reject(int id)
         {
             var claim = _context.Claims.FirstOrDefault(c => c.Id == id && !c.IsDeleted);
+
             if (claim == null)
             {
                 TempData["Error"] = "Claim not found.";
                 return RedirectToAction("Approval");
             }
 
-            string managerUsername = User.Identity!.Name!;
-
             claim.Status = "Rejected by Manager";
             claim.ManagerStatus = "Rejected";
-            claim.ManagerId = managerUsername;
+            claim.ManagerId = User.Identity!.Name!;
             claim.DateApproved = DateTime.Now;
 
             _context.SaveChanges();
@@ -113,7 +112,7 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Approval");
         }
 
-        // REPORTS
+        // MANAGER REPORTS PAGE
         public IActionResult Reports()
         {
             var claims = _context.Claims
@@ -137,7 +136,7 @@ namespace CMCSApplication.Controllers
             return View();
         }
 
-        // PDF EXPORT
+        // PDF DOWNLOAD
         public IActionResult DownloadReportPdf()
         {
             var claims = _context.Claims
@@ -160,7 +159,6 @@ namespace CMCSApplication.Controllers
             document.Add(new iTextSharp.text.Paragraph("\n"));
 
             var table = new iTextSharp.text.pdf.PdfPTable(5) { WidthPercentage = 100 };
-
             table.AddCell("Lecturer");
             table.AddCell("Department");
             table.AddCell("Month");
@@ -180,84 +178,6 @@ namespace CMCSApplication.Controllers
             document.Close();
 
             return File(ms.ToArray(), "application/pdf", "MonthlyClaimReport.pdf");
-        }
-
-        // MODULE ASSIGNMENT
-        public IActionResult AssignModules()
-        {
-            ViewBag.Lecturers = _context.Lecturers.ToList();
-            ViewBag.Modules = _context.Modules.ToList();
-            ViewBag.Assignments = _context.ModuleAssignments
-                .Include(ma => ma.Lecturer)
-                .Include(ma => ma.Module)
-                .ToList();
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult AssignModule(int lecturerId, int moduleId)
-        {
-            if (!_context.ModuleAssignments.Any(ma => ma.LecturerId == lecturerId && ma.ModuleId == moduleId))
-            {
-                _context.ModuleAssignments.Add(new ModuleAssignment
-                {
-                    LecturerId = lecturerId,
-                    ModuleId = moduleId
-                });
-                _context.SaveChanges();
-                TempData["Success"] = "Module assigned!";
-            }
-            else
-            {
-                TempData["Error"] = "Module already assigned.";
-            }
-
-            return RedirectToAction("AssignModules");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult AddModuleInline(string moduleName)
-        {
-            if (string.IsNullOrWhiteSpace(moduleName))
-            {
-                TempData["Error"] = "Module name required.";
-                return RedirectToAction("AssignModules");
-            }
-
-            if (_context.Modules.Any(m => m.Name == moduleName))
-            {
-                TempData["Error"] = "Module already exists.";
-                return RedirectToAction("AssignModules");
-            }
-
-            _context.Modules.Add(new Module { Name = moduleName });
-            _context.SaveChanges();
-
-            TempData["Success"] = "Module added.";
-            return RedirectToAction("AssignModules");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteAssignment(int id)
-        {
-            var assignment = _context.ModuleAssignments.FirstOrDefault(ma => ma.Id == id);
-
-            if (assignment != null)
-            {
-                _context.ModuleAssignments.Remove(assignment);
-                _context.SaveChanges();
-                TempData["Success"] = "Assignment removed!";
-            }
-            else
-            {
-                TempData["Error"] = "Assignment not found.";
-            }
-
-            return RedirectToAction("AssignModules");
         }
     }
 }
