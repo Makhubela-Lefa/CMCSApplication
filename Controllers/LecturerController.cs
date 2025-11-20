@@ -150,7 +150,7 @@ namespace CMCSApplication.Controllers
                 claim.SupportingDocument = $"/uploads/{uniqueFileName}";
             }
 
-            // --- Claim Metadata ---
+            // Claim Metadata 
             claim.Status = "Pending Verification";
             claim.DateSubmitted = DateTime.Now;
 

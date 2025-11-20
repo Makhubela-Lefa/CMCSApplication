@@ -30,11 +30,11 @@ namespace CMCSApplication.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            // --- Session (still allowed to keep for convenience) ---
+            // Session (still allowed to keep for convenience) 
             HttpContext.Session.SetInt32("LecturerId", lecturer.Id);
             HttpContext.Session.SetString("LecturerName", lecturer.Name);
 
-            // --- Cookie Authentication (required for [Authorize]) ---
+            // Cookie Authentication (required for [Authorize]) 
             var claims = new[]
             {
         new Claim("LecturerId", lecturer.Id.ToString()),

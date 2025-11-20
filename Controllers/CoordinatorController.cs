@@ -113,7 +113,7 @@ namespace CMCSApplication.Controllers
         // View all claims for review (simplified, no filters)
         public IActionResult ReviewQueue()
         {
-            // 🔐 Ensure coordinator is logged in
+            // Ensure coordinator is logged in
             var username = HttpContext.Session.GetString("Username");
             if (username == null)
                 return RedirectToAction("Login", "Account");
