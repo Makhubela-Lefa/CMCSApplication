@@ -1,14 +1,21 @@
 ﻿@model CMCSApplication.Models.User
+@using System.Text.Json
 
 @{
     ViewData["Title"] = "Edit User";
+
+    var departments = ViewBag.Departments as List<CMCSApplication.Models.Department> 
+                      ?? new List<CMCSApplication.Models.Department>();
+
+    // Now serialize safely AFTER defining departments
+    var deptJson = JsonSerializer.Serialize(departments);
 }
+
 
 <div class="container py-4">
     <h2 class="mb-4">Edit User</h2>
 
     <form asp-action="Edit" method="post" class="card shadow-sm p-4">
-
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
         <input type="hidden" asp-for="Id" />
@@ -16,19 +23,16 @@
         <div class="mb-3">
             <label asp-for="Name" class="form-label"></label>
             <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
             <label asp-for="Surname" class="form-label"></label>
             <input asp-for="Surname" class="form-control" />
-            <span asp-validation-for="Surname" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
             <label asp-for="Email" class="form-label"></label>
             <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
@@ -39,35 +43,67 @@
                 <option value="Manager">Manager</option>
                 <option value="HR">HR</option>
             </select>
-            <span asp-validation-for="Role" class="text-danger"></span>
         </div>
 
+        <!-- Department dropdown -->
+        <div class="mb-3" id="departmentContainer">
+            <label class="form-label">Department</label>
+            <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
+                <option value="">-- Select Department --</option>
+
+                @foreach (var d in departments)
+                {
+                    <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">
+                        @d.Name
+                    </option>
+                }
+            </select>
+
+        </div>
+
+        <!-- Auto hourly rate -->
         <div class="mb-3" id="hourlyRateContainer">
-            <label asp-for="HourlyRate" class="form-label">Hourly Rate (Lecturer only)</label>
-            <input asp-for="HourlyRate" class="form-control" />
-            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+            <label asp-for="HourlyRate" class="form-label">Hourly Rate</label>
+            <input asp-for="HourlyRate" readonly class="form-control" id="hourlyRateInput" />
         </div>
 
         <button class="btn btn-warning">Save Changes</button>
         <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
-
     </form>
 </div>
 
 @section Scripts {
     <script>
-        const roleSelect = document.getElementById("roleSelect");
-        const hourlyRate = document.getElementById("hourlyRateContainer");
+        const role = document.getElementById("roleSelect");
+        const deptContainer = document.getElementById("departmentContainer");
+        const rateContainer = document.getElementById("hourlyRateContainer");
+        const rateInput = document.getElementById("hourlyRateInput");
+        const deptSelect = document.getElementById("departmentSelect");
+        const departments = JSON.parse(`@Html.Raw(deptJson)`);
 
-        function toggleRateEdit() {
-            if (roleSelect.value === "Lecturer") {
-                hourlyRate.style.display = "block";
+
+        function toggleFields() {
+            if (role.value === "Lecturer") {
+                deptContainer.style.display = "block";
+                rateContainer.style.display = "block";
             } else {
-                hourlyRate.style.display = "none";
+                deptContainer.style.display = "none";
+                rateContainer.style.display = "none";
+                rateInput.value = "";
             }
         }
 
-        toggleRateEdit(); // Run on load
-        roleSelect.addEventListener("change", toggleRateEdit);
+        function updateRate() {
+            const selectedId = parseInt(deptSelect.value);
+            const match = departments.find(d => d.id === selectedId);
+            rateInput.value = match ? match.hourlyRate : "";
+        }
+
+        toggleFields();
+        updateRate();
+
+        role.addEventListener("change", toggleFields);
+        deptSelect.addEventListener("change", updateRate);
     </script>
 }
+

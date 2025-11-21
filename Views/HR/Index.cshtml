@@ -3,6 +3,17 @@
     ViewData["Title"] = "HR Dashboard";
 }
 
+<a class="btn btn-outline-secondary w-100 mt-2"
+   asp-controller="Department" asp-action="Index">
+    Department Rates
+</a>
+
+<a class="btn btn-outline-success w-100"
+   asp-controller="HR" asp-action="Invoice">
+    Generate Invoices
+</a>
+
+
 <div class="container py-4">
 
     <h2 class="fw-bold mb-4">HR Dashboard</h2>
@@ -70,10 +81,12 @@
                         <th>Surname</th>
                         <th>Username</th>
                         <th>Role</th>
+                        <th>Department</th>     
                         <th>Hourly Rate</th>
                         <th></th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var user in Model)
                     {
@@ -82,6 +95,7 @@
                             <td>@user.Surname</td>
                             <td>@user.Username</td>
                             <td>@user.Role</td>
+                            <td>@(user.Department?.Name ?? "-")</td>   <!-- NEW -->
                             <td>@(user.HourlyRate?.ToString("C") ?? "-")</td>
                             <td>
                                 <a class="btn btn-sm btn-outline-secondary"
@@ -94,6 +108,7 @@
                         </tr>
                     }
                 </tbody>
+
             </table>
         </div>
     </div>

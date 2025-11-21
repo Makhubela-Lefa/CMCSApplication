@@ -26,6 +26,10 @@ namespace CMCSApplication.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
+        // Department assignment for department dropdown
+        public int? DepartmentId { get; set; }
+        public Department? Department { get; set; }
+
         // Lecturer-specific
         public decimal? HourlyRate { get; set; } // Only for Lecturers
 

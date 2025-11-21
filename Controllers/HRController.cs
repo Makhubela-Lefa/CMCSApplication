@@ -3,9 +3,12 @@ using System.Linq;
 using CMCSApplication.Data;
 using CMCSApplication.Models;
 using CMCSApplication.Models.ViewModels;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SkiaSharp;
 
 namespace CMCSApplication.Controllers
 {
@@ -20,16 +23,18 @@ namespace CMCSApplication.Controllers
         }
 
         // LIST ALL USERS
-        
         public IActionResult Index()
         {
-            var users = _context.Users.ToList();
+            var users = _context.Users
+                .Include(u => u.Department)   // <— so the view can show Department.Name
+                .ToList();
+
             return View(users);
         }
 
-       
+
         // CREATE NEW USER
-        
+
         public IActionResult Create()
         {
             return View();
@@ -50,7 +55,7 @@ namespace CMCSApplication.Controllers
                 var lecturer = new Lecturer
                 {
                     Name = $"{user.Name} {user.Surname}",
-                    Department = "Not Assigned",
+                    DepartmentId = null,
                     HourlyRate = user.HourlyRate ?? 0,
                     Username = user.Username
                 };
@@ -66,13 +71,19 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("Index");
         }
 
-       
+
         // EDIT USER
-        
         public IActionResult Edit(int id)
         {
-            var user = _context.Users.Find(id);
-            if (user == null) return NotFound();
+            var user = _context.Users
+                 .Include(u => u.Department)
+                .Include(u => u.Lecturer)
+                .FirstOrDefault(u => u.Id == id);
+
+            if (user == null)
+                return NotFound();
+
+            ViewBag.Departments = _context.Departments.ToList();
 
             return View(user);
         }
@@ -81,29 +92,95 @@ namespace CMCSApplication.Controllers
         public IActionResult Edit(User user)
         {
             if (!ModelState.IsValid)
-                return View(user);
-
-            _context.Users.Update(user);
-            _context.SaveChanges();
-
-            // Update linked lecturer info if needed
-            if (user.Role == "Lecturer" && user.LecturerId != null)
             {
-                var lec = _context.Lecturers.Find(user.LecturerId);
-                if (lec != null)
+                ViewBag.Departments = _context.Departments.ToList();
+                return View(user);
+            }
+
+            // Load actual DB record (very important)
+            var existing = _context.Users
+                .Include(u => u.Lecturer)
+                .FirstOrDefault(u => u.Id == user.Id);
+
+            if (existing == null)
+                return NotFound();
+
+            // Update basic fields
+            existing.Name = user.Name;
+            existing.Surname = user.Surname;
+            existing.Email = user.Email;
+            existing.Role = user.Role;
+            existing.DepartmentId = user.DepartmentId;
+
+            // If lecturer: apply department rate
+            if (user.Role == "Lecturer")
+            {
+                if (user.DepartmentId.HasValue)
                 {
-                    lec.Name = $"{user.Name} {user.Surname}";
-                    lec.HourlyRate = user.HourlyRate ?? lec.HourlyRate;
-                    _context.Lecturers.Update(lec);
+                    var dept = _context.Departments
+                        .FirstOrDefault(d => d.Id == user.DepartmentId);
+
+                    if (dept != null)
+                        existing.HourlyRate = dept.HourlyRate;
+                }
+
+                // Ensure lecturer profile exists
+                if (existing.LecturerId == null)
+                {
+                    var newLecturer = new Lecturer
+                    {
+                        Name = $"{existing.Name} {existing.Surname}",
+                        Username = existing.Username,
+                        DepartmentId = user.DepartmentId,
+                        HourlyRate = existing.HourlyRate ?? 0
+                    };
+
+                    _context.Lecturers.Add(newLecturer);
                     _context.SaveChanges();
+
+                    existing.LecturerId = newLecturer.Id;
+                }
+                else
+                {
+                    // Update lecturer profile
+                    var lec = existing.Lecturer;
+                    if (lec != null)
+                    {
+                        lec.Name = $"{existing.Name} {existing.Surname}";
+                        lec.Username = existing.Username;
+                        lec.DepartmentId = user.DepartmentId;
+                        lec.HourlyRate = existing.HourlyRate ?? lec.HourlyRate;
+
+                        _context.Lecturers.Update(lec);
+                    }
                 }
             }
+            else
+            {
+                // If NOT lecturer: clear lecturer fields
+                existing.HourlyRate = null;
+                existing.DepartmentId = null;
+
+                if (existing.LecturerId != null)
+                {
+                    var lec = _context.Lecturers
+                        .FirstOrDefault(l => l.Id == existing.LecturerId);
+
+                    if (lec != null)
+                        _context.Lecturers.Remove(lec);
+
+                    existing.LecturerId = null;
+                }
+            }
+
+            _context.Users.Update(existing);
+            _context.SaveChanges();
 
             return RedirectToAction("Index");
         }
 
         // USER DETAILS
-        
+
         public IActionResult Details(int id)
         {
             var user = _context.Users.Find(id);
@@ -242,5 +319,165 @@ namespace CMCSApplication.Controllers
             return RedirectToAction("AssignModules");
         }
 
+        // EXPORT ALL CLAIMS AS PDF (HR)
+        public IActionResult ExportClaimsPdf()
+        {
+            var claims = _context.Claims
+                .Include(c => c.Module)
+                .Include(c => c.Lecturer)
+                .OrderByDescending(c => c.DateSubmitted)
+                .ToList();
+
+            using var ms = new MemoryStream();
+            var document = new iTextSharp.text.Document();
+            iTextSharp.text.pdf.PdfWriter.GetInstance(document, ms);
+
+            document.Open();
+
+            // GREEN TITLE 
+            var titleFont = iTextSharp.text.FontFactory.GetFont("Arial", 18, iTextSharp.text.Font.BOLD, new iTextSharp.text.BaseColor(34, 139, 34));
+            document.Add(new iTextSharp.text.Paragraph("CMCS – Full Claims Report", titleFont));
+            document.Add(new iTextSharp.text.Paragraph("\n"));
+
+            // SUMMARY
+            var summaryFont = iTextSharp.text.FontFactory.GetFont("Arial", 12, iTextSharp.text.Font.NORMAL);
+
+            document.Add(new iTextSharp.text.Paragraph($"Total Claims: {claims.Count}", summaryFont));
+            document.Add(new iTextSharp.text.Paragraph($"Total Amount: R {claims.Sum(c => c.TotalAmount):N2}", summaryFont));
+            document.Add(new iTextSharp.text.Paragraph($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}", summaryFont));
+            document.Add(new iTextSharp.text.Paragraph("\n"));
+
+            // GREEN TABLE HEADER
+            var table = new iTextSharp.text.pdf.PdfPTable(7) { WidthPercentage = 100 };
+
+            var headerFont = iTextSharp.text.FontFactory.GetFont("Arial", 12, iTextSharp.text.Font.BOLD, new iTextSharp.text.BaseColor(34, 139, 34));
+
+            string[] headers = { "Lecturer", "Department", "Month", "Hours", "Rate", "Amount", "Status" };
+
+            foreach (var h in headers)
+            {
+                var cell = new iTextSharp.text.pdf.PdfPCell(new iTextSharp.text.Phrase(h, headerFont))
+                {
+                    BackgroundColor = new iTextSharp.text.BaseColor(232, 255, 232) // light green
+                };
+                table.AddCell(cell);
+            }
+
+            // ====== TABLE BODY ======
+            foreach (var c in claims)
+            {
+                table.AddCell(c.LecturerName);
+                table.AddCell(c.Department);
+                table.AddCell(c.Month);
+                table.AddCell(c.HoursWorked.ToString());
+                table.AddCell("R " + c.HourlyRate.ToString("N2"));
+                table.AddCell("R " + c.TotalAmount.ToString("N2"));
+                table.AddCell(c.Status);
+            }
+
+            document.Add(table);
+            document.Close();
+
+            return File(ms.ToArray(), "application/pdf", "HR_AllClaimsReport.pdf");
+        }
+
+        // HR: Select Lecturer to Generate Invoice
+        public IActionResult Invoice()
+        {
+            var lecturers = _context.Lecturers.ToList();
+            return View(lecturers);
+        }
+
+[HttpPost]
+    public IActionResult GenerateInvoice(int lecturerId)
+    {
+        var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
+        if (lecturer == null)
+            return NotFound();
+
+        var claims = _context.Claims
+            .Where(c => c.LecturerId == lecturerId && c.ManagerStatus == "Approved")
+            .OrderByDescending(c => c.Month)
+            .ToList();
+
+        if (!claims.Any())
+        {
+            TempData["Error"] = "No approved claims for this lecturer.";
+            return RedirectToAction("Invoice");
+        }
+
+        using var ms = new MemoryStream();
+        var doc = new Document(PageSize.A4, 30, 30, 30, 30);
+        PdfWriter.GetInstance(doc, ms);
+
+        doc.Open();
+
+        // Green header color
+        var green = new BaseColor(15, 140, 90);
+
+        var titleFont = FontFactory.GetFont("Arial", 18, Font.BOLD, green);
+        var headerFont = FontFactory.GetFont("Arial", 12, Font.BOLD);
+        var normalFont = FontFactory.GetFont("Arial", 10);
+
+        // Title
+        doc.Add(new Paragraph("LECTURER INVOICE", titleFont));
+        doc.Add(new Paragraph("\n"));
+
+        // Lecturer info
+        doc.Add(new Paragraph($"Name: {lecturer.Name}", normalFont));
+            doc.Add(new Paragraph($"Department: {lecturer.DepartmentRef?.Name ?? "Not Assigned"}", normalFont));
+            doc.Add(new Paragraph($"Hourly Rate: R {lecturer.HourlyRate}", normalFont));
+        doc.Add(new Paragraph("\n"));
+
+        // Table
+        var table = new PdfPTable(4) { WidthPercentage = 100 };
+        table.SetWidths(new float[] { 2, 1, 1, 1 });
+
+        // Table headers
+        void AddHeader(string text)
+        {
+            var cell = new PdfPCell(new Phrase(text, headerFont))
+            {
+                BackgroundColor = green,
+                Padding = 5,
+                HorizontalAlignment = Element.ALIGN_CENTER
+            };
+            table.AddCell(cell);
+        }
+
+        AddHeader("Month");
+        AddHeader("Hours Worked");
+        AddHeader("Rate");
+        AddHeader("Total");
+
+        decimal grandTotal = 0;
+
+        foreach (var c in claims)
+        {
+            table.AddCell(new Phrase(c.Month, normalFont));
+            table.AddCell(new Phrase(c.HoursWorked.ToString(), normalFont));
+            table.AddCell(new Phrase($"R {c.HourlyRate}", normalFont));
+
+            var total = c.HoursWorked * c.HourlyRate;
+            grandTotal += total;
+
+            table.AddCell(new Phrase($"R {total}", normalFont));
+        }
+
+        doc.Add(table);
+        doc.Add(new Paragraph("\n"));
+
+        // Grand Total
+        var totalParagraph = new Paragraph($"Grand Total: R {grandTotal}", titleFont)
+        {
+            Alignment = Element.ALIGN_RIGHT
+        };
+        doc.Add(totalParagraph);
+
+        doc.Close();
+
+        return File(ms.ToArray(), "application/pdf", $"Invoice_{lecturer.Name}.pdf");
     }
+
+}
 }

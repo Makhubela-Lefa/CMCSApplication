@@ -1,0 +1,22 @@
+﻿@model CMCSApplication.Models.Department
+
+@{
+    ViewData["Title"] = "Delete Department";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-4 text-danger">Delete Department</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p>Are you sure you want to delete <strong>@Model.Name</strong>?</p>
+            <p>This may affect lecturers linked to this department.</p>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button class="btn btn-danger">Yes, Delete</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

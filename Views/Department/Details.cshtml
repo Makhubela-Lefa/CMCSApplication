@@ -1,0 +1,24 @@
+﻿@model CMCSApplication.Models.Department
+
+@{
+    ViewData["Title"] = "Department Details";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Department Details</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">Hourly Rate</dt>
+                <dd class="col-sm-9">R @Model.HourlyRate.ToString("N2")</dd>
+            </dl>
+
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,15 @@
     ViewData["Title"] = "All Claims";
 }
 
+<a class="btn btn-outline-success w-100"
+   asp-controller="HR" asp-action="Invoice">
+    Generate Invoices
+</a>
+
+<a class="btn btn-success mb-3" asp-action="ExportClaimsPdf">
+    Download Claims PDF
+</a>
+
 <div class="container py-4">
 
     <h2 class="mb-4">All Claims</h2>

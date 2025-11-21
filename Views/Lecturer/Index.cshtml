@@ -1,4 +1,5 @@
-﻿@model IEnumerable<CMCSApplication.Models.Claim>
+﻿@model CMCSApplication.Models.ViewModels.LecturerDashboardVM
+
 
 @{
     ViewData["Title"] = "Lecturer Dashboard";
@@ -45,11 +46,9 @@
         </div>
     </div>
 
-    <hr class="my-4" />
-
     <h5 class="mb-3">Recent Claims</h5>
 
-    @if (Model != null && Model.Any())
+    @if (Model.RecentClaims != null && Model.RecentClaims.Any())
     {
         <div class="table-responsive">
             <table class="table table-striped align-middle">
@@ -64,7 +63,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var claim in Model.OrderByDescending(c => c.DateSubmitted).Take(5))
+                    @foreach (var claim in Model.RecentClaims.OrderByDescending(c => c.DateSubmitted))
                     {
                         <tr>
                             <td>@claim.Month</td>
@@ -76,7 +75,7 @@
                                 {
                                     <span class="badge bg-success">Approved</span>
                                 }
-                                else if (claim.Status == "Rejected")
+                                else if (claim.Status.Contains("Rejected"))
                                 {
                                     <span class="badge bg-danger">Rejected</span>
                                 }
@@ -96,4 +95,5 @@
     {
         <p class="text-muted">No claims submitted yet.</p>
     }
+
 </div>

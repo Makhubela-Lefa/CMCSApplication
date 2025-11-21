@@ -1,5 +1,6 @@
 ﻿using CMCSApplication.Data;
 using CMCSApplication.Models;
+using CMCSApplication.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +18,13 @@ namespace CMCSApplication.Controllers
             _context = context;
         }
 
-        // Lecturer Dashboard
         public IActionResult Index()
         {
             int lecturerId = int.Parse(User.Claims.First(c => c.Type == "LecturerId").Value);
+
+            var lecturer = _context.Lecturers
+                .Include(l => l.DepartmentRef)
+                .FirstOrDefault(l => l.Id == lecturerId);
 
             var recentClaims = _context.Claims
                 .Where(c => c.LecturerId == lecturerId && !c.IsDeleted)
@@ -28,9 +32,14 @@ namespace CMCSApplication.Controllers
                 .Take(5)
                 .ToList();
 
-            return View(recentClaims);
-        }
+            var vm = new LecturerDashboardVM
+            {
+                Lecturer = lecturer,
+                RecentClaims = recentClaims
+            };
 
+            return View(vm);
+        }
 
         // View My Claims
         public IActionResult MyClaims()
