@@ -1,0 +1,40 @@
+﻿@model IEnumerable<CMCSApplication.Models.ViewModels.LecturerWithUserIdVM>
+
+@{
+    ViewData["Title"] = "Manage Lecturers";
+}
+
+<div class="container py-4">
+    <h2 class="mb-3">Lecturer Profiles</h2>
+
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Hourly Rate</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Lecturer.Name</td>
+                    <td>@(item.Lecturer.Department != null ? item.Lecturer.Department.Name : "—")</td>
+                    <td>R @item.Lecturer.HourlyRate</td>
+
+                    <td>
+                        <a asp-controller="HR" asp-action="Edit"
+                           asp-route-id="@item.UserId"
+                           class="btn btn-sm btn-outline-primary">Edit</a>
+                    </td>
+                </tr>
+            }
+           
+        </tbody>
+    </table>
+
+    <a asp-controller="HR" asp-action="Index" class="btn btn-secondary">Back</a>
+</div>

@@ -61,19 +61,22 @@ namespace CMCSApplication.Controllers
         {
             int lecturerId = int.Parse(User.Claims.First(c => c.Type == "LecturerId").Value);
 
-            var lecturer = _context.Lecturers.FirstOrDefault(l => l.Id == lecturerId);
+            var lecturer = _context.Lecturers
+                .Include(l => l.Department)
+                .FirstOrDefault(l => l.Id == lecturerId);
+
             if (lecturer == null) return NotFound();
 
             var model = new ClaimModel
             {
                 LecturerId = lecturer.Id,
                 LecturerName = lecturer.Name,
-                HourlyRate = lecturer.HourlyRate
+                HourlyRate = lecturer.HourlyRate,
+                Department = lecturer.Department?.Name
             };
 
             return View(model);
         }
-
 
         // POST: Submit claim
         [HttpPost]
@@ -82,14 +85,17 @@ namespace CMCSApplication.Controllers
         {
             int lecturerId = int.Parse(User.Claims.First(c => c.Type == "LecturerId").Value);
 
-            var lecturer = _context.Lecturers.First(l => l.Id == lecturerId);
+            var lecturer = _context.Lecturers
+                .Include(l => l.Department)
+                .First(l => l.Id == lecturerId);
 
-            // Override fields so lecturer cannot tamper
+            // Enforce server authority
             claim.LecturerId = lecturer.Id;
             claim.LecturerName = lecturer.Name;
+            claim.Department = lecturer.Department?.Name;
             claim.HourlyRate = lecturer.HourlyRate;
-            claim.Status = "Pending Verification";
             claim.DateSubmitted = DateTime.Now;
+            claim.Status = "Pending Verification";
             claim.Amount = claim.HoursWorked * lecturer.HourlyRate;
 
             if (claim.HoursWorked > 180)
@@ -98,7 +104,7 @@ namespace CMCSApplication.Controllers
                 return View(claim);
             }
 
-            // Upload document
+            // File upload stays the same
             if (claim.UploadFile != null)
             {
                 var ext = Path.GetExtension(claim.UploadFile.FileName).ToLower();

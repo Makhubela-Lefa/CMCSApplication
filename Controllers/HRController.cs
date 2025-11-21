@@ -262,6 +262,26 @@ namespace CMCSApplication.Controllers
             return View(claims);
         }
 
+        // MANAGE LECTURERS
+        public IActionResult ManageLecturers()
+        {
+            var lecturers = _context.Lecturers
+                .Include(l => l.Department)
+                .Select(l => new LecturerWithUserIdVM
+                {
+                    Lecturer = l,
+                    UserId = _context.Users
+                             .Where(u => u.LecturerId == l.Id)
+                             .Select(u => u.Id)
+                             .FirstOrDefault()
+                })
+                .ToList();
+
+            return View(lecturers);
+        }
+
+
+
         // MODULE ASSIGNMENT (HR ONLY)
 
         // GET: HR/AssignModules
