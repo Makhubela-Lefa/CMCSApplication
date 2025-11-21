@@ -95,8 +95,10 @@
                             <td>@user.Surname</td>
                             <td>@user.Username</td>
                             <td>@user.Role</td>
-                            <td>@(user.Department?.Name ?? "-")</td>   <!-- NEW -->
-                            <td>@(user.HourlyRate?.ToString("C") ?? "-")</td>
+                            <td>
+                                @(user.Department != null ? user.Department.Name : "—")
+                            </td>
+                            <td>@(user.HourlyRate.HasValue ? $"R {user.HourlyRate}" : "—")</td>
                             <td>
                                 <a class="btn btn-sm btn-outline-secondary"
                                    asp-action="Details" asp-route-id="@user.Id">Details</a>

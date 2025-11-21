@@ -1,83 +1,121 @@
 ﻿@model CMCSApplication.Models.User
+@using System.Text.Json
 
 @{
     ViewData["Title"] = "Add New User";
+
+    var departments = ViewBag.Departments as List<CMCSApplication.Models.Department>
+                      ?? new List<CMCSApplication.Models.Department>();
+
+    var deptJson = JsonSerializer.Serialize(departments);
 }
 
 <div class="container py-4">
-    <h2 class="mb-4">Add New User</h2>
+    <h2 class="fw-bold mb-4">Add New User</h2>
 
-    <form asp-action="Create" method="post" class="card shadow-sm p-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-        <div class="mb-3">
-            <label asp-for="Name" class="form-label"></label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Surname" class="form-label"></label>
+                    <input asp-for="Surname" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label"></label>
+                    <select asp-for="Role" class="form-select" id="roleSelect">
+                        <option value="">-- Select Role --</option>
+                        <option value="Lecturer">Lecturer</option>
+                        <option value="Coordinator">Coordinator</option>
+                        <option value="Manager">Manager</option>
+                        <option value="HR">HR</option>
+                    </select>
+                </div>
+
+                <!-- Department dropdown -->
+                <div class="mb-3" id="departmentContainer">
+                    <label class="form-label">Department</label>
+                    <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
+                        <option value="">-- Select Department --</option>
+                        @foreach (var d in departments)
+                        {
+                            <option value="@d.Id">@d.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Hourly rate auto -->
+                <div class="mb-3" id="hourlyRateContainer">
+                    <label asp-for="HourlyRate" class="form-label">Hourly Rate</label>
+                    <input asp-for="HourlyRate" class="form-control" id="hourlyRateInput" readonly />
+                </div>
+
+                <button class="btn btn-success">Save User</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+
         </div>
-
-        <div class="mb-3">
-            <label asp-for="Surname" class="form-label"></label>
-            <input asp-for="Surname" class="form-control" />
-            <span asp-validation-for="Surname" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Username" class="form-label"></label>
-            <input asp-for="Username" class="form-control" />
-            <span asp-validation-for="Username" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Password" class="form-label"></label>
-            <input asp-for="Password" type="password" class="form-control" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Role" class="form-label"></label>
-            <select asp-for="Role" class="form-select" id="roleSelect">
-                <option disabled selected>-- Select Role --</option>
-                <option value="Lecturer">Lecturer</option>
-                <option value="Coordinator">Coordinator</option>
-                <option value="Manager">Manager</option>
-                <option value="HR">HR</option>
-            </select>
-            <span asp-validation-for="Role" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3" id="hourlyRateContainer" style="display:none;">
-            <label asp-for="HourlyRate" class="form-label">Hourly Rate (Lecturer only)</label>
-            <input asp-for="HourlyRate" class="form-control" />
-            <span asp-validation-for="HourlyRate" class="text-danger"></span>
-        </div>
-
-        <button class="btn btn-success">Save User</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
-
-    </form>
+    </div>
 </div>
+
+<a asp-controller="HR" asp-action="Index"
+   class="btn btn-outline-primary rounded-pill shadow-sm mt-3">
+    ⬅ Back to Dashboard
+</a>
 
 @section Scripts {
     <script>
-        const roleSelect = document.getElementById("roleSelect");
-        const hourlyRate = document.getElementById("hourlyRateContainer");
+        const role = document.getElementById("roleSelect");
+        const deptContainer = document.getElementById("departmentContainer");
+        const rateContainer = document.getElementById("hourlyRateContainer");
+        const deptSelect = document.getElementById("departmentSelect");
+        const rateInput = document.getElementById("hourlyRateInput");
 
-        function toggleRate() {
-            if (roleSelect.value === "Lecturer") {
-                hourlyRate.style.display = "block";
+        const departments = @Html.Raw(JsonSerializer.Serialize(departments));
+
+        function toggleFields() {
+            if (role.value === "Lecturer") {
+                deptContainer.style.display = "block";
+                rateContainer.style.display = "block";
             } else {
-                hourlyRate.style.display = "none";
+                deptContainer.style.display = "none";
+                rateContainer.style.display = "none";
+                deptSelect.value = "";
+                rateInput.value = "";
             }
         }
 
-        roleSelect.addEventListener("change", toggleRate);
+        function updateRate() {
+            const selectedId = parseInt(deptSelect.value);
+            const dept = departments.find(x => x.id === selectedId);
+            rateInput.value = dept ? dept.hourlyRate : "";
+        }
+
+        toggleFields();
+        role.addEventListener("change", toggleFields);
+        deptSelect.addEventListener("change", updateRate);
     </script>
 }

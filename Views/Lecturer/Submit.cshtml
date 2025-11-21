@@ -37,9 +37,8 @@
 
                     <!-- Department -->
                     <div class="col-md-6">
-                        <label asp-for="Department" class="form-label fw-semibold"></label>
-                        <input asp-for="Department" class="form-control" placeholder="e.g., Computer Science" />
-                        <span asp-validation-for="Department" class="text-danger"></span>
+                        <label class="form-label fw-semibold">Department</label>
+                        <input class="form-control" value="@Model.Department" readonly />
                     </div>
 
                     <!-- Month -->

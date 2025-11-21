@@ -60,7 +60,7 @@
                             <td>
                                 @if (!string.IsNullOrEmpty(claim.SupportingDocument))
                                 {
-                                    <a href="~/uploads/@claim.SupportingDocument" target="_blank">View</a>
+                                    <a href="@claim.SupportingDocument" target="_blank">View</a>
                                 }
                                 else
                                 {

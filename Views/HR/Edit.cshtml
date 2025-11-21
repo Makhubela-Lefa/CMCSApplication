@@ -4,13 +4,11 @@
 @{
     ViewData["Title"] = "Edit User";
 
-    var departments = ViewBag.Departments as List<CMCSApplication.Models.Department> 
+    var departments = ViewBag.Departments as List<CMCSApplication.Models.Department>
                       ?? new List<CMCSApplication.Models.Department>();
 
-    // Now serialize safely AFTER defining departments
     var deptJson = JsonSerializer.Serialize(departments);
 }
-
 
 <div class="container py-4">
     <h2 class="mb-4">Edit User</h2>
@@ -45,12 +43,11 @@
             </select>
         </div>
 
-        <!-- Department dropdown -->
+        <!-- Department -->
         <div class="mb-3" id="departmentContainer">
             <label class="form-label">Department</label>
             <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
                 <option value="">-- Select Department --</option>
-
                 @foreach (var d in departments)
                 {
                     <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">
@@ -58,10 +55,9 @@
                     </option>
                 }
             </select>
-
         </div>
 
-        <!-- Auto hourly rate -->
+        <!-- Hourly Rate -->
         <div class="mb-3" id="hourlyRateContainer">
             <label asp-for="HourlyRate" class="form-label">Hourly Rate</label>
             <input asp-for="HourlyRate" readonly class="form-control" id="hourlyRateInput" />
@@ -77,10 +73,10 @@
         const role = document.getElementById("roleSelect");
         const deptContainer = document.getElementById("departmentContainer");
         const rateContainer = document.getElementById("hourlyRateContainer");
-        const rateInput = document.getElementById("hourlyRateInput");
         const deptSelect = document.getElementById("departmentSelect");
-        const departments = JSON.parse(`@Html.Raw(deptJson)`);
+        const rateInput = document.getElementById("hourlyRateInput");
 
+        const departments = @Html.Raw(JsonSerializer.Serialize(departments));
 
         function toggleFields() {
             if (role.value === "Lecturer") {
@@ -95,7 +91,7 @@
 
         function updateRate() {
             const selectedId = parseInt(deptSelect.value);
-            const match = departments.find(d => d.id === selectedId);
+            const match = departments.find(x => x.id === selectedId);
             rateInput.value = match ? match.hourlyRate : "";
         }
 
@@ -106,4 +102,3 @@
         deptSelect.addEventListener("change", updateRate);
     </script>
 }
-

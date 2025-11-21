@@ -12,6 +12,10 @@
 <a class="btn btn-success mb-3" asp-action="ExportClaimsPdf">
     Download Claims PDF
 </a>
+<a asp-controller="HR" asp-action="Index"
+   class="btn btn-outline-primary rounded-pill shadow-sm mb-3">
+    ⬅ Back to Dashboard
+</a>
 
 <div class="container py-4">
 
@@ -40,7 +44,7 @@
                             <td>@c.Department</td>
                             <td>@c.Month</td>
                             <td>@c.HoursWorked</td>
-                            <td>R @c.TotalAmount</td>
+                            <td>R @c.TotalAmount.ToString("0.00")</td>
 
                             <td>
                                 @if (c.Status.Contains("Rejected"))

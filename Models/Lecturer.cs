@@ -13,7 +13,7 @@ namespace CMCSApplication.Models
 
        // public string Department { get; set; } = string.Empty;
         public int? DepartmentId { get; set; }
-        public Department? DepartmentRef { get; set; }
+        public Department? Department { get; set; }
 
 
         [Range(0, 2000)]

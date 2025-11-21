@@ -14,6 +14,12 @@
         🏠 Home
     </a>
 
+    <div class="alert alert-success shadow-sm p-3 rounded-3 mb-4">
+        <h5 class="fw-bold">@Model.Lecturer.Name</h5>
+        <p><strong>Department:</strong> @Model.Lecturer.Department?.Name</p>
+        <p><strong>Hourly Rate:</strong> R @Model.Lecturer.HourlyRate</p>
+    </div>
+
     <div class="row g-4">
         <div class="col-md-4">
             <div class="card shadow-sm h-100">

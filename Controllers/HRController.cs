@@ -26,7 +26,7 @@ namespace CMCSApplication.Controllers
         public IActionResult Index()
         {
             var users = _context.Users
-                .Include(u => u.Department)   // <— so the view can show Department.Name
+                .Include(u => u.Department)
                 .ToList();
 
             return View(users);
@@ -35,34 +35,58 @@ namespace CMCSApplication.Controllers
 
         // CREATE NEW USER
 
+        // GET: Create User
         public IActionResult Create()
         {
+            ViewBag.Departments = _context.Departments.ToList();
             return View();
         }
 
+
+        // POST: Create User
         [HttpPost]
         public IActionResult Create(User user)
         {
             if (!ModelState.IsValid)
+            {
+                ViewBag.Departments = _context.Departments.ToList();
                 return View(user);
+            }
+
+            // If Lecturer → apply department hourly rate
+            if (user.Role == "Lecturer" && user.DepartmentId.HasValue)
+            {
+                var dept = _context.Departments.FirstOrDefault(d => d.Id == user.DepartmentId);
+                if (dept != null)
+                {
+                    user.HourlyRate = dept.HourlyRate;
+                }
+            }
+            else
+            {
+                // Non-lecturers do not have a department or hourly rate
+                user.DepartmentId = null;
+                user.HourlyRate = null;
+            }
 
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            // If user is Lecturer → auto create lecturer profile
+            // Auto create Lecturer profile ONLY if Lecturer
             if (user.Role == "Lecturer")
             {
                 var lecturer = new Lecturer
                 {
                     Name = $"{user.Name} {user.Surname}",
-                    DepartmentId = null,
-                    HourlyRate = user.HourlyRate ?? 0,
-                    Username = user.Username
+                    Username = user.Username,
+                    DepartmentId = user.DepartmentId,
+                    HourlyRate = user.HourlyRate ?? 0
                 };
 
                 _context.Lecturers.Add(lecturer);
                 _context.SaveChanges();
 
+                // Link the lecturer profile to the user account
                 user.LecturerId = lecturer.Id;
                 _context.Users.Update(user);
                 _context.SaveChanges();
@@ -73,10 +97,11 @@ namespace CMCSApplication.Controllers
 
 
         // EDIT USER
+        // GET: Edit User
         public IActionResult Edit(int id)
         {
             var user = _context.Users
-                 .Include(u => u.Department)
+                .Include(u => u.Department)
                 .Include(u => u.Lecturer)
                 .FirstOrDefault(u => u.Id == id);
 
@@ -84,10 +109,11 @@ namespace CMCSApplication.Controllers
                 return NotFound();
 
             ViewBag.Departments = _context.Departments.ToList();
-
             return View(user);
         }
 
+
+        // POST: Edit User
         [HttpPost]
         public IActionResult Edit(User user)
         {
@@ -97,7 +123,6 @@ namespace CMCSApplication.Controllers
                 return View(user);
             }
 
-            // Load actual DB record (very important)
             var existing = _context.Users
                 .Include(u => u.Lecturer)
                 .FirstOrDefault(u => u.Id == user.Id);
@@ -105,26 +130,29 @@ namespace CMCSApplication.Controllers
             if (existing == null)
                 return NotFound();
 
-            // Update basic fields
+            // Update editable fields
             existing.Name = user.Name;
             existing.Surname = user.Surname;
             existing.Email = user.Email;
             existing.Role = user.Role;
-            existing.DepartmentId = user.DepartmentId;
+            existing.Username = user.Username;
 
-            // If lecturer: apply department rate
+            // ============================
+            // CASE 1 — LECTURER
+            // ============================
             if (user.Role == "Lecturer")
             {
+                existing.DepartmentId = user.DepartmentId;
+
+                // Apply hourly rate from department
                 if (user.DepartmentId.HasValue)
                 {
-                    var dept = _context.Departments
-                        .FirstOrDefault(d => d.Id == user.DepartmentId);
-
+                    var dept = _context.Departments.FirstOrDefault(d => d.Id == user.DepartmentId);
                     if (dept != null)
                         existing.HourlyRate = dept.HourlyRate;
                 }
 
-                // Ensure lecturer profile exists
+                // Create lecturer profile if missing
                 if (existing.LecturerId == null)
                 {
                     var newLecturer = new Lecturer
@@ -144,28 +172,26 @@ namespace CMCSApplication.Controllers
                 {
                     // Update lecturer profile
                     var lec = existing.Lecturer;
-                    if (lec != null)
-                    {
-                        lec.Name = $"{existing.Name} {existing.Surname}";
-                        lec.Username = existing.Username;
-                        lec.DepartmentId = user.DepartmentId;
-                        lec.HourlyRate = existing.HourlyRate ?? lec.HourlyRate;
+                    lec.Name = $"{existing.Name} {existing.Surname}";
+                    lec.Username = existing.Username;
+                    lec.DepartmentId = existing.DepartmentId;
+                    lec.HourlyRate = existing.HourlyRate ?? lec.HourlyRate;
 
-                        _context.Lecturers.Update(lec);
-                    }
+                    _context.Lecturers.Update(lec);
                 }
             }
             else
             {
-                // If NOT lecturer: clear lecturer fields
-                existing.HourlyRate = null;
+                // ============================
+                // CASE 2 — NOT LECTURER
+                // ============================
                 existing.DepartmentId = null;
+                existing.HourlyRate = null;
 
+                // Remove lecturer profile if it exists
                 if (existing.LecturerId != null)
                 {
-                    var lec = _context.Lecturers
-                        .FirstOrDefault(l => l.Id == existing.LecturerId);
-
+                    var lec = _context.Lecturers.FirstOrDefault(l => l.Id == existing.LecturerId);
                     if (lec != null)
                         _context.Lecturers.Remove(lec);
 
@@ -180,17 +206,22 @@ namespace CMCSApplication.Controllers
         }
 
         // USER DETAILS
-
         public IActionResult Details(int id)
         {
-            var user = _context.Users.Find(id);
-            if (user == null) return NotFound();
+            var user = _context.Users
+                .Include(u => u.Department)
+                .Include(u => u.Lecturer)
+                .FirstOrDefault(u => u.Id == id);
+
+            if (user == null)
+                return NotFound();
 
             return View(user);
         }
 
+
         // DELETE USER
-        
+
         public IActionResult Delete(int id)
         {
             var user = _context.Users.Find(id);
@@ -425,7 +456,7 @@ namespace CMCSApplication.Controllers
 
         // Lecturer info
         doc.Add(new Paragraph($"Name: {lecturer.Name}", normalFont));
-            doc.Add(new Paragraph($"Department: {lecturer.DepartmentRef?.Name ?? "Not Assigned"}", normalFont));
+            doc.Add(new Paragraph($"Department: {lecturer.Department?.Name ?? "Not Assigned"}", normalFont));
             doc.Add(new Paragraph($"Hourly Rate: R {lecturer.HourlyRate}", normalFont));
         doc.Add(new Paragraph("\n"));
 

@@ -22,10 +22,15 @@
             <dt class="col-sm-3">Role</dt>
             <dd class="col-sm-9">@Model.Role</dd>
 
+            <dt class="col-sm-3">Department</dt>
+            <dd class="col-sm-9">@Model.Department?.Name ?? "—"</dd>
+
             @if (Model.Role == "Lecturer")
             {
                 <dt class="col-sm-3">Hourly Rate</dt>
-                <dd class="col-sm-9">R @Model.HourlyRate</dd>
+                <dd class="col-sm-9">
+                    @(Model.HourlyRate.HasValue ? $"R {Model.HourlyRate}" : "—")
+                </dd>
             }
 
         </dl>
@@ -35,4 +40,10 @@
             <a asp-action="Index" class="btn btn-secondary">Back</a>
         </div>
     </div>
+
+    <!-- HR Dashboard Back Button -->
+    <a asp-controller="HR" asp-action="Index"
+       class="btn btn-outline-primary rounded-pill shadow-sm mt-3">
+        ⬅ Back to HR Dashboard
+    </a>
 </div>

@@ -4,7 +4,7 @@ using CMCSApplication.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ClaimModel = CMCSApplication.Models.Claim;   // FIXES AMBIGUOUS CLAIM ERROR
+using ClaimModel = CMCSApplication.Models.Claim;  
 
 namespace CMCSApplication.Controllers
 {
@@ -23,7 +23,7 @@ namespace CMCSApplication.Controllers
             int lecturerId = int.Parse(User.Claims.First(c => c.Type == "LecturerId").Value);
 
             var lecturer = _context.Lecturers
-                .Include(l => l.DepartmentRef)
+                .Include(l => l.Department)
                 .FirstOrDefault(l => l.Id == lecturerId);
 
             var recentClaims = _context.Claims
