@@ -281,100 +281,10 @@ namespace CMCSApplication.Controllers
         }
 
 
-
-        // MODULE ASSIGNMENT (HR ONLY)
-
-        // GET: HR/AssignModules
-        public IActionResult AssignModules()
-        {
-            var vm = new ModuleAssignmentVM
-            {
-                Lecturers = _context.Lecturers.ToList(),
-                Modules = _context.Modules.ToList(),
-                Assignments = _context.ModuleAssignments
-                    .Include(ma => ma.Lecturer)
-                    .Include(ma => ma.Module)
-                    .ToList()
-            };
-
-            return View(vm);
-        }
-
-        // POST: Assign a module to a lecturer
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult AssignModule(int lecturerId, int moduleId)
-        {
-            // Prevent duplicates
-            if (!_context.ModuleAssignments.Any(ma => ma.LecturerId == lecturerId && ma.ModuleId == moduleId))
-            {
-                _context.ModuleAssignments.Add(new ModuleAssignment
-                {
-                    LecturerId = lecturerId,
-                    ModuleId = moduleId
-                });
-
-                _context.SaveChanges();
-                TempData["Success"] = "Module assigned successfully!";
-            }
-            else
-            {
-                TempData["Error"] = "This module is already assigned to that lecturer.";
-            }
-
-            return RedirectToAction("AssignModules");
-        }
-
-        // POST: Add module inline (from modal)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult AddModuleInline(string moduleName)
-        {
-            if (string.IsNullOrWhiteSpace(moduleName))
-            {
-                TempData["Error"] = "Module name cannot be empty.";
-                return RedirectToAction("AssignModules");
-            }
-
-            if (_context.Modules.Any(m => m.Name == moduleName))
-            {
-                TempData["Error"] = "This module already exists.";
-                return RedirectToAction("AssignModules");
-            }
-
-            _context.Modules.Add(new Module { Name = moduleName });
-            _context.SaveChanges();
-
-            TempData["Success"] = "Module added successfully!";
-            return RedirectToAction("AssignModules");
-        }
-
-        // POST: Delete a module assignment
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteAssignment(int id)
-        {
-            var assignment = _context.ModuleAssignments.FirstOrDefault(a => a.Id == id);
-
-            if (assignment != null)
-            {
-                _context.ModuleAssignments.Remove(assignment);
-                _context.SaveChanges();
-                TempData["Success"] = "Assignment deleted successfully!";
-            }
-            else
-            {
-                TempData["Error"] = "Assignment not found.";
-            }
-
-            return RedirectToAction("AssignModules");
-        }
-
         // EXPORT ALL CLAIMS AS PDF (HR)
         public IActionResult ExportClaimsPdf()
         {
             var claims = _context.Claims
-                .Include(c => c.Module)
                 .Include(c => c.Lecturer)
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();

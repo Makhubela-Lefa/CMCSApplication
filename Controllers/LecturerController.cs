@@ -98,9 +98,9 @@ namespace CMCSApplication.Controllers
             claim.Status = "Pending Verification";
             claim.Amount = claim.HoursWorked * lecturer.HourlyRate;
 
-            if (claim.HoursWorked > 180)
+            if (claim.HoursWorked > 220)
             {
-                ModelState.AddModelError("HoursWorked", "You cannot claim more than 180 hours.");
+                ModelState.AddModelError("HoursWorked", "You cannot claim more than 220 hours for a month.");
                 return View(claim);
             }
 
@@ -137,75 +137,6 @@ namespace CMCSApplication.Controllers
             TempData["SuccessMessage"] = "Claim submitted successfully!";
             return RedirectToAction(nameof(MyClaims));
         }
-
-
-        // GET: Upload Page (only own claims)
-        [HttpGet]
-        public IActionResult Upload()
-        {
-            int lecturerId = int.Parse(User.Claims.First(c => c.Type == "LecturerId").Value);
-
-            var claims = _context.Claims
-                .Where(c => c.LecturerId == lecturerId && !c.IsDeleted)
-                .ToList();
-
-            ViewBag.Claims = claims;
-
-            return View();
-        }
-
-
-        // POST: Upload file for a specific claim
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Upload(int claimId, IFormFile file)
-        {
-            int lecturerId = int.Parse(User.Claims.First(c => c.Type == "LecturerId").Value);
-
-            var claim = _context.Claims
-                .FirstOrDefault(c => c.Id == claimId && c.LecturerId == lecturerId);
-
-            if (claim == null)
-            {
-                TempData["UploadMessage"] = "Invalid claim.";
-                return RedirectToAction(nameof(Upload));
-            }
-
-            if (file == null || file.Length == 0)
-            {
-                TempData["UploadMessage"] = "Please select a valid file.";
-                return RedirectToAction(nameof(Upload));
-            }
-
-            var ext = Path.GetExtension(file.FileName).ToLower();
-            var allowed = new[] { ".pdf", ".docx", ".xlsx" };
-            if (!allowed.Contains(ext))
-            {
-                TempData["UploadMessage"] = "Invalid file type.";
-                return RedirectToAction(nameof(Upload));
-            }
-
-            var folder = Path.Combine("wwwroot/uploads");
-            Directory.CreateDirectory(folder);
-
-            var fileName = Guid.NewGuid() + ext;
-            var path = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                file.CopyTo(stream);
-            }
-
-            claim.SupportingDocument = "/uploads/" + fileName;
-            claim.OriginalFileName = file.FileName;
-
-            _context.Update(claim);
-            _context.SaveChanges();
-
-            TempData["UploadMessage"] = "Uploaded successfully!";
-            return RedirectToAction(nameof(Upload));
-        }
-
 
         // Soft delete by lecturer
         [HttpPost]

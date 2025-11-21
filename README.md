@@ -174,7 +174,7 @@ Use the login details listed earlier in this README.
 - Hourly rate pulled automatically  
 - Read-only fields for rate & identity  
 - File upload validation (.pdf, .docx, .xlsx)  
-- 180-hour max validation  
+- 220-hour max validation  
 
 ### **Coordinator & Manager Workflow**
 - Role-based access  

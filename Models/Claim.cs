@@ -26,7 +26,7 @@ namespace CMCSApplication.Models
         public string Month { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Hours worked is required")]
-        [Range(1, 180, ErrorMessage = "Hours must be between 1 and 180")]
+        [Range(1, 220, ErrorMessage = "Hours must be between 1 and 220")]
         public int HoursWorked { get; set; }
 
         [Required(ErrorMessage = "Hourly rate is required")]
@@ -78,9 +78,6 @@ namespace CMCSApplication.Models
         [NotMapped]
         [Display(Name = "Upload Document")]
         public IFormFile? UploadFile { get; set; }
-        public int? ModuleId { get; set; }   // foreign key
-        public Module? Module { get; set; }  // navigation property
-
       
     }
 }
