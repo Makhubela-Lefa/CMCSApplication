@@ -202,7 +202,8 @@ Built using **iTextSharp** with a green corporate theme to match app branding.
 
 ## YouTube Demonstration Video
   
-Video Link: ''
+Part 1 Video Link: 'https://youtu.be/Qsa5XY1SOps'
+Part 2 Video Link: 'https://youtu.be/eBk2VRARkPM'
 
 The video is **10-15 minutes**, demonstrating:
 - Role logins  
