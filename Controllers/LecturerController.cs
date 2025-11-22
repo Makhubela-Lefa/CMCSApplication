@@ -67,6 +67,13 @@ namespace CMCSApplication.Controllers
 
             if (lecturer == null) return NotFound();
 
+            // NEW: Block if lecturer has no department
+            if (lecturer.Department == null)
+            {
+                TempData["Error"] = "You cannot submit a claim because your profile has no department assigned. Please contact HR to update your department.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var model = new ClaimModel
             {
                 LecturerId = lecturer.Id,
@@ -89,14 +96,27 @@ namespace CMCSApplication.Controllers
                 .Include(l => l.Department)
                 .First(l => l.Id == lecturerId);
 
-            // Enforce server authority
+            // NEW: Block if no department
+            if (lecturer.Department == null)
+            {
+                TempData["Error"] = "Your profile is missing a department. Please contact HR to update your details before submitting claims.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Enforce server authority — ALWAYS override client values
             claim.LecturerId = lecturer.Id;
             claim.LecturerName = lecturer.Name;
-            claim.Department = lecturer.Department?.Name;
+            claim.Department = lecturer.Department.Name;  // now guaranteed not null
             claim.HourlyRate = lecturer.HourlyRate;
             claim.DateSubmitted = DateTime.Now;
             claim.Status = "Pending Verification";
             claim.Amount = claim.HoursWorked * lecturer.HourlyRate;
+
+            // NEW: Validate model before trying to save
+            if (!ModelState.IsValid)
+            {
+                return View(claim);
+            }
 
             if (claim.HoursWorked > 220)
             {

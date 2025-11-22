@@ -117,92 +117,102 @@ namespace CMCSApplication.Controllers
         [HttpPost]
         public IActionResult Edit(User user)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                ViewBag.Departments = _context.Departments.ToList();
-                return View(user);
-            }
-
-            var existing = _context.Users
-                .Include(u => u.Lecturer)
-                .FirstOrDefault(u => u.Id == user.Id);
-
-            if (existing == null)
-                return NotFound();
-
-            // Update editable fields
-            existing.Name = user.Name;
-            existing.Surname = user.Surname;
-            existing.Email = user.Email;
-            existing.Role = user.Role;
-            existing.Username = user.Username;
-
-            // ============================
-            // CASE 1 — LECTURER
-            // ============================
-            if (user.Role == "Lecturer")
-            {
-                existing.DepartmentId = user.DepartmentId;
-
-                // Apply hourly rate from department
-                if (user.DepartmentId.HasValue)
+                if (!ModelState.IsValid)
                 {
-                    var dept = _context.Departments.FirstOrDefault(d => d.Id == user.DepartmentId);
-                    if (dept != null)
-                        existing.HourlyRate = dept.HourlyRate;
+                    ViewBag.Departments = _context.Departments.ToList();
+                    return View(user);
                 }
 
-                // Create lecturer profile if missing
-                if (existing.LecturerId == null)
+                var existing = _context.Users
+                    .Include(u => u.Lecturer)
+                    .FirstOrDefault(u => u.Id == user.Id);
+
+                if (existing == null)
+                    return NotFound();
+
+                // Update basic fields
+                existing.Name = user.Name;
+                existing.Surname = user.Surname;
+                existing.Email = user.Email;
+                existing.Role = user.Role;
+                existing.Username = user.Username;
+
+                // -------------------------------
+                // CASE 1 — USER IS A LECTURER
+                // -------------------------------
+                if (user.Role == "Lecturer")
                 {
-                    var newLecturer = new Lecturer
+                    // UPDATE DEPARTMENT ID FIRST
+                    existing.DepartmentId = user.DepartmentId;
+
+                    // APPLY HOURLY RATE FROM DEPARTMENT
+                    if (user.DepartmentId.HasValue)
                     {
-                        Name = $"{existing.Name} {existing.Surname}",
-                        Username = existing.Username,
-                        DepartmentId = user.DepartmentId,
-                        HourlyRate = existing.HourlyRate ?? 0
-                    };
+                        var dept = _context.Departments.FirstOrDefault(d => d.Id == user.DepartmentId);
+                        if (dept != null)
+                            existing.HourlyRate = dept.HourlyRate;
+                    }
 
-                    _context.Lecturers.Add(newLecturer);
-                    _context.SaveChanges();
+                    // CREATE lecturer record if missing
+                    if (existing.LecturerId == null)
+                    {
+                        var newLecturer = new Lecturer
+                        {
+                            Name = $"{existing.Name} {existing.Surname}",
+                            Username = existing.Username,
+                            DepartmentId = existing.DepartmentId,
+                            HourlyRate = existing.HourlyRate ?? 0
+                        };
 
-                    existing.LecturerId = newLecturer.Id;
+                        _context.Lecturers.Add(newLecturer);
+                        _context.SaveChanges();
+
+                        existing.LecturerId = newLecturer.Id;
+                    }
+                    else
+                    {
+                        // UPDATE LINKED LECTURER
+                        var lec = existing.Lecturer;
+
+                        lec.Name = $"{existing.Name} {existing.Surname}";
+                        lec.Username = existing.Username;
+                        lec.DepartmentId = existing.DepartmentId;
+                        lec.HourlyRate = existing.HourlyRate ?? lec.HourlyRate;
+
+                        _context.Lecturers.Update(lec);
+                    }
                 }
                 else
                 {
-                    // Update lecturer profile
-                    var lec = existing.Lecturer;
-                    lec.Name = $"{existing.Name} {existing.Surname}";
-                    lec.Username = existing.Username;
-                    lec.DepartmentId = existing.DepartmentId;
-                    lec.HourlyRate = existing.HourlyRate ?? lec.HourlyRate;
+                    // -------------------------------
+                    // CASE 2 — NOT A LECTURER
+                    // -------------------------------
+                    existing.DepartmentId = null;
+                    existing.HourlyRate = null;
 
-                    _context.Lecturers.Update(lec);
+                    if (existing.LecturerId != null)
+                    {
+                        var lec = _context.Lecturers.FirstOrDefault(l => l.Id == existing.LecturerId);
+                        if (lec != null)
+                            _context.Lecturers.Remove(lec);
+
+                        existing.LecturerId = null;
+                    }
                 }
+
+                _context.Users.Update(existing);
+                _context.SaveChanges();
+
+                return RedirectToAction("Index");
             }
-            else
+            catch (Exception ex)
             {
-                // ============================
-                // CASE 2 — NOT LECTURER
-                // ============================
-                existing.DepartmentId = null;
-                existing.HourlyRate = null;
-
-                // Remove lecturer profile if it exists
-                if (existing.LecturerId != null)
-                {
-                    var lec = _context.Lecturers.FirstOrDefault(l => l.Id == existing.LecturerId);
-                    if (lec != null)
-                        _context.Lecturers.Remove(lec);
-
-                    existing.LecturerId = null;
-                }
+                // TEMP DEBUG: show exact error message
+                TempData["Error"] = "ERROR: " + ex.Message;
+                return RedirectToAction("Edit", new { id = user.Id });
             }
-
-            _context.Users.Update(existing);
-            _context.SaveChanges();
-
-            return RedirectToAction("Index");
         }
 
         // USER DETAILS

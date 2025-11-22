@@ -13,10 +13,11 @@
 <div class="container py-4">
     <h2 class="mb-4">Edit User</h2>
 
-    <form asp-action="Edit" method="post" class="card shadow-sm p-4">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <form asp-controller="HR" asp-action="Edit" method="post" class="card shadow-sm p-4">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Password" />
 
         <div class="mb-3">
             <label asp-for="Name" class="form-label"></label>
@@ -34,6 +35,12 @@
         </div>
 
         <div class="mb-3">
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" autocomplete="username" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
             <label asp-for="Role" class="form-label"></label>
             <select asp-for="Role" class="form-select" id="roleSelect">
                 <option value="Lecturer">Lecturer</option>
@@ -46,15 +53,12 @@
         <!-- Department -->
         <div class="mb-3" id="departmentContainer">
             <label class="form-label">Department</label>
-            <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
+            <select asp-for="DepartmentId" class="form-select" id="DepartmentId"
+                    asp-items="@(new SelectList(departments, "Id", "Name", Model.DepartmentId))">
                 <option value="">-- Select Department --</option>
-                @foreach (var d in departments)
-                {
-                    <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">
-                        @d.Name
-                    </option>
-                }
             </select>
+
+
         </div>
 
         <!-- Hourly Rate -->
@@ -63,42 +67,48 @@
             <input asp-for="HourlyRate" readonly class="form-control" id="hourlyRateInput" />
         </div>
 
-        <button class="btn btn-warning">Save Changes</button>
+        <button type="submit" class="btn btn-warning">Save Changes</button>
         <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
     </form>
 </div>
 
 @section Scripts {
     <script>
-        const role = document.getElementById("roleSelect");
-        const deptContainer = document.getElementById("departmentContainer");
-        const rateContainer = document.getElementById("hourlyRateContainer");
-        const deptSelect = document.getElementById("departmentSelect");
-        const rateInput = document.getElementById("hourlyRateInput");
+        document.addEventListener("DOMContentLoaded", function () {
 
-        const departments = @Html.Raw(JsonSerializer.Serialize(departments));
+            const role = document.getElementById("roleSelect");
+            const deptContainer = document.getElementById("departmentContainer");
+            const rateContainer = document.getElementById("hourlyRateContainer");
 
-        function toggleFields() {
-            if (role.value === "Lecturer") {
-                deptContainer.style.display = "block";
-                rateContainer.style.display = "block";
-            } else {
-                deptContainer.style.display = "none";
-                rateContainer.style.display = "none";
-                rateInput.value = "";
+            // Razor generates: id="DepartmentId"
+            const deptSelect = document.getElementById("DepartmentId");
+            const rateInput = document.getElementById("hourlyRateInput");
+
+            const departments = @Html.Raw(JsonSerializer.Serialize(departments));
+
+            function toggleFields() {
+                if (role.value === "Lecturer") {
+                    deptContainer.style.display = "block";
+                    rateContainer.style.display = "block";
+                } else {
+                    deptContainer.style.display = "none";
+                    rateContainer.style.display = "none";
+                    deptSelect.value = "";
+                    rateInput.value = "";
+                }
             }
-        }
 
-        function updateRate() {
-            const selectedId = parseInt(deptSelect.value);
-            const match = departments.find(x => x.id === selectedId);
-            rateInput.value = match ? match.hourlyRate : "";
-        }
+            function updateRate() {
+                const selectedId = parseInt(deptSelect.value);
+                const dept = departments.find(x => x.Id === selectedId);
+                rateInput.value = dept ? dept.HourlyRate : "";
+            }
 
-        toggleFields();
-        updateRate();
+            toggleFields();
+            updateRate();
 
-        role.addEventListener("change", toggleFields);
-        deptSelect.addEventListener("change", updateRate);
+            role.addEventListener("change", toggleFields);
+            deptSelect.addEventListener("change", updateRate);
+        });
     </script>
 }
