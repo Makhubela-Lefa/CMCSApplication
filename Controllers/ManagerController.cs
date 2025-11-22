@@ -42,7 +42,9 @@ namespace CMCSApplication.Controllers
         public IActionResult Approval()
         {
             var claims = _context.Claims
-                .Where(c => !c.IsDeleted && c.Status == "Verified by Coordinator")
+                .Where(c => !c.IsDeleted
+                    && c.CoordinatorStatus == "Approved"
+                    && c.ManagerStatus == "Pending Approval")
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
@@ -79,6 +81,7 @@ namespace CMCSApplication.Controllers
 
             claim.Status = "Approved by Manager";
             claim.ManagerStatus = "Approved";
+            claim.Status = "Fully Approved";
             claim.ManagerId = User.Identity!.Name!;
             claim.DateApproved = DateTime.Now;
 

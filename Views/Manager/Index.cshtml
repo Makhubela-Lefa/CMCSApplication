@@ -92,7 +92,6 @@
                 <tr>
                     <th>Ref #</th>
                     <th>Lecturer</th>
-                    <th>Module</th>
                     <th>Month</th>
                     <th>Coordinator Status</th>
                     <th>Manager Status</th>
@@ -105,7 +104,6 @@
                     <tr>
                         <td>CLM-@claim.Id</td>
                         <td>@claim.LecturerName</td>
-                        <td>@claim.Module?.Name ?? "-"</td>
                         <td>@claim.Month</td>
                         <td>
                             <span class="badge @(claim.CoordinatorStatus == "Verified" ? "bg-success" :

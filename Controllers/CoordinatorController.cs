@@ -56,7 +56,8 @@ namespace CMCSApplication.Controllers
             string coordinatorUsername = User.Identity!.Name!;
 
             claim.Status = "Verified by Coordinator";
-            claim.CoordinatorStatus = "Verified";
+            claim.CoordinatorStatus = "Approved";
+            claim.ManagerStatus = "Pending Approval";
             claim.DateVerified = DateTime.Now;
             claim.CoordinatorId = coordinatorUsername;
 
@@ -80,8 +81,9 @@ namespace CMCSApplication.Controllers
 
             string coordinatorUsername = User.Identity!.Name!;
 
-            claim.Status = "Rejected by Coordinator";
             claim.CoordinatorStatus = "Rejected";
+            claim.Status = "Rejected by Coordinator";
+            claim.ManagerStatus = "N/A";
             claim.DateVerified = DateTime.Now;
             claim.CoordinatorId = coordinatorUsername;
 

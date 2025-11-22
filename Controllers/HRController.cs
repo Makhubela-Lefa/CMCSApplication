@@ -268,7 +268,9 @@ namespace CMCSApplication.Controllers
         
         public IActionResult ViewClaims()
         {
-            var claims = _context.Claims.ToList();
+            var claims = _context.Claims
+                .Where(c => c.ManagerStatus == "Approved")
+                .ToList();
             return View(claims);
         }
 
